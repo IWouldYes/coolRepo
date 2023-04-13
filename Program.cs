@@ -1,4 +1,5 @@
 ﻿
+using System.Data;
 using System.Data.SqlClient;
 
 namespace ConsoleApp9
@@ -108,12 +109,104 @@ namespace ConsoleApp9
         }
 
         
+        static int cantThinkOfANameRn(string[] text)
+        {
+
+
+            int pos = 0;
+            int txtsum;
+            while (true)
+            {
+                Console.Clear();
+                int spcnum = 0;
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    Console.Write(text[i]);
+                    Console.Write("   ");
+                }
+
+                for (int i = 0; i < pos; i++)
+                {
+                    spcnum += text[i].Length + 3;
+                }
+                Console.WriteLine();
+
+                for (int i = 0; i < spcnum; i++)
+                {
+                    Console.Write(" ");
+                }
+                Console.WriteLine("^");
+
+                if (pos >= text.Length)
+                    pos--;
+                else if (pos < 0)
+                    pos++;
+                else
+                    switch (Console.ReadKey().Key)
+                    {
+                        case ConsoleKey.RightArrow:
+                            pos++;
+                            break;
+                        case ConsoleKey.LeftArrow:
+                            pos--;
+                            break;
+                        case ConsoleKey.Enter:
+                            Console.Clear();
+                            return pos;
+                            Thread.Sleep(5000);
+                            Console.Clear();
+                            break;
+                    }
+            }
+        }
+
+
+        static void addListing(int userid)
+        {
+            string price, quantity, title, description;
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+            Console.Write("Title:");
+            title = Console.ReadLine();
+            title = lenght(50, 2, title, "Title");
+            Console.Write("Price:");
+            price = Console.ReadLine();
+            price = lenght(7, 1, price, "Price");
+            Console.Write("Quantity:");
+            quantity = Console.ReadLine();
+            quantity = lenght(1, 1, quantity, "Quantity");
+            Console.Write("Description:");
+            description = Console.ReadLine();
+            description = lenght(500, 0, description, "Description");
+            string[] categorytab = new string[] {
+                "toys",
+                "digital services",
+                "cosmetics and body care",
+                "food and beverage",
+                "health and wellness",
+                "household items",
+                "media",
+                "pet care",
+                "office equipment"};
+
+
+
+            SqlCommand addlisting;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("insert into[listings] (title, price, views, user_id, category_id, quantity, description) values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", title, price, 0, userid, cantThinkOfANameRn(categorytab) + 1, quantity, description);
+            addlisting = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
+
+
 
 
         static void Main(string[] args)
         {
-            
-            }
 
 
 
