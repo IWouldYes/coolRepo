@@ -108,7 +108,60 @@ namespace ConsoleApp9
 
         }
 
-        
+        static int login()
+        {
+            int id = 0;
+            string loginn, password;
+            Console.Write("Login:");
+            loginn = Console.ReadLine();
+            Console.Write("Password:");
+            password = Console.ReadLine();
+
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+
+
+            //selectowanie wszystkiego z wybranej tabeli i schemy
+            SqlCommand login = new SqlCommand();
+            login.Connection = conn;
+            login.CommandText = string.Format("select id from [user] where login = '{0}' AND password = '{1}'", loginn, password);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = login.ExecuteReader();
+            int numberOfColumns = reader2.FieldCount;
+
+            //nazwy kolumn
+            DataTable schemaTable = reader2.GetSchemaTable();
+            string[] columnNames = new string[numberOfColumns];
+            for (int i = 0; i < numberOfColumns; i++)
+            {
+                columnNames[i] = reader2.GetName(i);
+            }
+
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    for (int i = 0; i < numberOfColumns; i++)
+                    {
+                        Console.Write(columnNames[i]);
+                        Console.Write(": ");
+                        Console.WriteLine(reader2[i]);
+                        id = (int)reader2[1];
+                    }
+                    Console.WriteLine();
+
+                }
+            }
+            return id;
+            conn.Close();
+            //end of select
+        }
 
 
 
