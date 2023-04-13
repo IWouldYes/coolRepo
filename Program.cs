@@ -1,6 +1,7 @@
 ﻿
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection.Metadata;
 
 namespace ConsoleApp9
 {
@@ -32,7 +33,7 @@ namespace ConsoleApp9
 
 
 
-        static void register()
+        static int register()
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
@@ -106,8 +107,52 @@ namespace ConsoleApp9
             adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
 
+            return selectId(password, login);
         }
 
+        static int selectId(string password, string loginsql)
+        {
+            int id = 0;
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+
+
+            //selectowanie wszystkiego z wybranej tabeli i schemy
+            SqlCommand login = new SqlCommand();
+            login.Connection = conn;
+            login.CommandText = string.Format("select id from [User] where login = '{0}' AND password = '{1}'; ",loginsql ,password);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = login.ExecuteReader();
+            int numberOfColumns = reader2.FieldCount;
+
+
+            string[] columnNames = new string[numberOfColumns];
+            for (int i = 0; i < numberOfColumns; i++)
+            {
+                columnNames[i] = reader2.GetName(i);
+            }
+
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    for (int i = 0; i < numberOfColumns; i++)
+                    {
+                        id = (int)reader2[0];
+                    }
+
+
+                }
+            }
+            return id;
+            conn.Close();
+        }
         static int login()
         {
             int id = 0;
@@ -317,10 +362,33 @@ namespace ConsoleApp9
         static void Main(string[] args)
         {
             Boolean isLoggedIn = true;
-            int userid = 2;
+            int userid = 0;
             string[] myAcc = new string[] { "Login", "Register" };
             string[] hub = new string[] { "Search", "My account", "Add listing" };
+            
             switch (cantThinkOfANameRn(hub))
+            {
+                case 0:
+                    search();
+                    break;
+
+                case 1:
+                    if (cantThinkOfANameRn(myAcc) == 0)
+                        userid = login();
+                    else
+                        userid = register();
+                    break;
+
+
+            }
+            
+            
+            
+            
+            
+            
+            
+            /*switch (cantThinkOfANameRn(hub))
             {
                 case 0:
                     search();
@@ -350,7 +418,8 @@ namespace ConsoleApp9
 
                     }
                     break;
-            }
+            }*/
+        }
     }
 }
 
