@@ -109,6 +109,62 @@ namespace ConsoleApp9
         }
 
         
+
+
+
+        static void search()
+        {
+            SqlConnection conn = new SqlConnection("workstation id = application.mssql.somee.com; packet size = 4096; user id = app_SQLLogin_1; pwd = yespassword; data source = application.mssql.somee.com; persist security info = False; initial catalog = application");
+            conn.Open();
+
+            Console.Write("Search:");
+            string search = Console.ReadLine();
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("select title, price from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+            int numberOfColumns = reader2.FieldCount;
+
+            //nazwy kolumn
+            string[] columnNames = new string[numberOfColumns];
+            for (int i = 0; i < numberOfColumns; i++)
+            {
+                columnNames[i] = reader2.GetName(i);
+            }
+
+
+
+            Console.WriteLine();
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    for (int i = 0; i < numberOfColumns; i++)
+                    {
+                        Console.Write(columnNames[i]);
+                        Console.Write(": ");
+                        Console.WriteLine(reader2[i]);
+                    }
+                    Console.WriteLine();
+
+
+                }
+                Console.ReadLine();
+            }
+            else
+                Console.WriteLine("No results");
+            conn.Close();
+
+        }
+
+
+
+
         static int cantThinkOfANameRn(string[] text)
         {
 
