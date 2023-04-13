@@ -316,10 +316,41 @@ namespace ConsoleApp9
 
         static void Main(string[] args)
         {
+            Boolean isLoggedIn = true;
+            int userid = 2;
+            string[] myAcc = new string[] { "Login", "Register" };
+            string[] hub = new string[] { "Search", "My account", "Add listing" };
+            switch (cantThinkOfANameRn(hub))
+            {
+                case 0:
+                    search();
+                    break;
+
+                case 1:
+                    if (cantThinkOfANameRn(myAcc) == 0)
+                        userid = login();
+                    else
+                        register();
+                    break;
+
+                case 2:
+                    if (isLoggedIn)
+                        addListing(userid);
+                    else
+                    {
+                        Console.WriteLine("You need to create a new account first or login");
 
 
+                        if (cantThinkOfANameRn(myAcc) == 0)
+                            login();
+                        else
+                            register();
+                        isLoggedIn = true;
 
-        }
+
+                    }
+                    break;
+            }
     }
 }
 
