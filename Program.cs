@@ -1,13 +1,15 @@
-﻿
+
 using System.Data;
 using System.Data.SqlClient;
-using System.Reflection.Metadata;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Xml.Linq;
+
 
 namespace ConsoleApp9
 {
     internal class Program
     {
-
 
 
 
@@ -121,7 +123,7 @@ namespace ConsoleApp9
             //selectowanie wszystkiego z wybranej tabeli i schemy
             SqlCommand login = new SqlCommand();
             login.Connection = conn;
-            login.CommandText = string.Format("select id from [User] where login = '{0}' AND password = '{1}'; ",loginsql ,password);
+            login.CommandText = string.Format("select id from [User] where login = '{0}' AND password = '{1}'; ", loginsql, password);
 
 
             //liczba kolumn
@@ -162,7 +164,8 @@ namespace ConsoleApp9
             Console.Write("Password:");
             password = Console.ReadLine();
 
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            string connectionString = @"Data Source=(localdb)\local;Integrated Security=True;Connect Timeout=30";
+            SqlConnection conn = new SqlConnection(connectionString); 
             conn.Open();
 
 
@@ -212,7 +215,9 @@ namespace ConsoleApp9
 
         static void search()
         {
-            SqlConnection conn = new SqlConnection("workstation id = application.mssql.somee.com; packet size = 4096; user id = app_SQLLogin_1; pwd = yespassword; data source = application.mssql.somee.com; persist security info = False; initial catalog = application");
+            string connectionString = @"Data Source=(localdb)\local;Integrated Security=True;Connect Timeout=30";
+            SqlConnection conn = new SqlConnection(connectionString);
+
             conn.Open();
 
             Console.Write("Search:");
@@ -260,7 +265,44 @@ namespace ConsoleApp9
 
         }
 
+        static void myListings(int id)
+        {
+            SqlConnection conn = new SqlConnection("workstation id = application.mssql.somee.com; packet size = 4096; user id = app_SQLLogin_1; pwd = yespassword; data source = application.mssql.somee.com; persist security info = False; initial catalog = application");
+            conn.Open();
 
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("select title, price from [listings] where user_id = '{0}'", id);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+            int j=0;
+            Console.WriteLine();
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    j++;
+                    Console.Write(j);
+                    Console.Write(".");
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Console.WriteLine(reader2[i]);
+                    }
+
+
+
+                }
+                Console.ReadLine();
+            }
+            else
+                Console.WriteLine("No results");
+            conn.Close();
+
+        }
 
 
         static int cantThinkOfANameRn(string[] text)
@@ -276,21 +318,21 @@ namespace ConsoleApp9
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    Console.Write(text[i]);
-                    Console.Write("   ");
+                    Console.Write(i+1);
+                    Console.Write(".");
+                    Console.WriteLine(text[i]);
                 }
 
                 for (int i = 0; i < pos; i++)
                 {
-                    spcnum += text[i].Length + 3;
+                    spcnum += 1;
                 }
-                Console.WriteLine();
 
-                for (int i = 0; i < spcnum; i++)
-                {
-                    Console.Write(" ");
-                }
-                Console.WriteLine("^");
+
+                Console.WriteLine();
+                Console.WriteLine(spcnum+1);
+                Console.WriteLine();
+                Console.WriteLine("use up and down arrows to choose");
 
                 if (pos >= text.Length)
                     pos--;
@@ -299,10 +341,10 @@ namespace ConsoleApp9
                 else
                     switch (Console.ReadKey().Key)
                     {
-                        case ConsoleKey.RightArrow:
+                        case ConsoleKey.UpArrow:
                             pos++;
                             break;
-                        case ConsoleKey.LeftArrow:
+                        case ConsoleKey.DownArrow:
                             pos--;
                             break;
                         case ConsoleKey.Enter:
@@ -357,15 +399,73 @@ namespace ConsoleApp9
         }
 
 
+        static void editListing(int id)
+        {
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+            string title;
+            Console.Write("Title:");
+            title = Console.ReadLine();
 
 
+            string price, quantity, newtitle, description;
+            
+
+            Console.Write("New title:");
+            newtitle = Console.ReadLine();
+            newtitle = lenght(50, 2, title, "New title");
+            Console.Write("Price:");
+            price = Console.ReadLine();
+            price = lenght(7, 1, price, "Price");
+            Console.Write("Quantity:");
+            quantity = Console.ReadLine();
+            quantity = lenght(1, 1, quantity, "Quantity");
+            Console.Write("Description:");
+            description = Console.ReadLine();
+            description = lenght(500, 0, description, "Description");
+            string[] categorytab = new string[] {
+                "toys",
+                "digital services",
+                "cosmetics and body care",
+                "food and beverage",
+                "health and wellness",
+                "household items",
+                "media",
+                "pet care",
+                "office equipment"};
+
+
+            SqlCommand editListing;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE ID = {5};", cantThinkOfANameRn(categorytab), newtitle, price, quantity, description);
+            editListing = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
+
+        static void delListing(int id)
+        {
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+            string title;
+            Console.Write("Title:");
+            title = Console.ReadLine();
+
+            SqlCommand delListing;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("delete from listings where title = '{0}' and user_id = '{1}'",title,id);
+            delListing = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
         static void Main(string[] args)
         {
             Boolean isLoggedIn = true;
             int userid = 0;
             string[] myAcc = new string[] { "Login", "Register" };
-            string[] hub = new string[] { "Search", "My account", "Add listing" };
-            
+            string[] hub = new string[] { "Search", "My account", "My listings" };
             switch (cantThinkOfANameRn(hub))
             {
                 case 0:
@@ -379,15 +479,20 @@ namespace ConsoleApp9
                         userid = register();
                     break;
 
+                case 2:
+                    myListings(2);
+                    break;
+
+
 
             }
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
             /*switch (cantThinkOfANameRn(hub))
             {
                 case 0:
@@ -422,5 +527,4 @@ namespace ConsoleApp9
         }
     }
 }
-
 
