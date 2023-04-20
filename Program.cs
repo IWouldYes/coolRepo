@@ -1,19 +1,16 @@
 
+
+
+
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics.Metrics;
-using System.IO;
-using System.Runtime.ExceptionServices;
-using System.Xml.Linq;
-
 
 namespace ConsoleApp9
 {
     internal class Program
     {
-        private string key;
 
-        public string Key { get => key; set => key = value; }
+
 
         static string lenght(int max, int min, string var, string varName)
         {
@@ -36,7 +33,7 @@ namespace ConsoleApp9
 
         static int register()
         {
-            SqlConnection conn = new SqlConnection(Key);
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
 
             string login, fName, lName, password, phoneNumber, description, country, city, street;
@@ -114,7 +111,7 @@ namespace ConsoleApp9
         static int selectId(string password, string loginsql)
         {
             int id = 0;
-            SqlConnection conn = new SqlConnection(Key);
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
 
 
@@ -155,7 +152,7 @@ namespace ConsoleApp9
             conn.Close();
         }
 
-        static int login()
+        static int login(bool isLoggedIn)
         {
             int id = 0;
             string loginn, password;
@@ -164,8 +161,8 @@ namespace ConsoleApp9
             Console.Write("Password:");
             password = Console.ReadLine();
 
-            string connectionString = @Key;
-            SqlConnection conn = new SqlConnection(connectionString); 
+            string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
+            SqlConnection conn = new SqlConnection(connectionString);
             conn.Open();
 
 
@@ -200,12 +197,16 @@ namespace ConsoleApp9
                         Console.Write(columnNames[i]);
                         Console.Write(": ");
                         Console.WriteLine(reader2[i]);
-                        id = (int)reader2[1];
+                        id = (int)reader2[0];
                     }
                     Console.WriteLine();
 
                 }
             }
+            if (id == 0)
+                isLoggedIn = false;
+            else
+                isLoggedIn = true;
             return id;
             conn.Close();
             //end of select
@@ -213,7 +214,7 @@ namespace ConsoleApp9
 
         static void search()
         {
-            string connectionString = @Key;
+            string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -224,7 +225,7 @@ namespace ConsoleApp9
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("select title, price from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
+            searchcomm.CommandText = string.Format("select title, price, description, quantity from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
 
 
             //liczba kolumn
@@ -254,8 +255,7 @@ namespace ConsoleApp9
                     Console.WriteLine();
 
 
-                }
-                Console.ReadLine();
+                };
             }
             else
                 Console.WriteLine("No results");
@@ -265,10 +265,10 @@ namespace ConsoleApp9
 
         static void editListing(int id)
         {
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
             string title;
-            Console.Write("Title:");
+            Console.Write("Title of the listing you want to change:");
             title = Console.ReadLine();
 
 
@@ -302,7 +302,7 @@ namespace ConsoleApp9
 
             SqlCommand editListing;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE ID = {5};", cantThinkOfANameRn(categorytab), newtitle, price, quantity, description);
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE user_id = '{5}';", cantThinkOfANameRn(categorytab, id), newtitle, price, quantity, description, id);
             editListing = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
@@ -311,10 +311,10 @@ namespace ConsoleApp9
 
         static void delListing(int id)
         {
-            SqlConnection conn = new SqlConnection(Key);
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
             string title;
-            Console.Write("Title:");
+            Console.Write("Title of the listing you want to delete:");
             title = Console.ReadLine();
 
             SqlCommand delListing;
@@ -328,7 +328,7 @@ namespace ConsoleApp9
 
         static void myListings(int id)
         {
-            SqlConnection conn = new SqlConnection(Key);
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
 
 
@@ -340,46 +340,48 @@ namespace ConsoleApp9
 
             //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
-            int j=0;
+            Console.WriteLine("Your listings:");
             Console.WriteLine();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
                 {
-                    j++;
-                    Console.Write(j);
-                    Console.Write(".");
-                    for (int i = 0; i < 2; i++)
-                    {
-                        Console.WriteLine(reader2[i]);
-                    }
-
+                    Console.Write("title:");
+                    Console.WriteLine(reader2[0]);
+                    Console.Write("price:");
+                    Console.WriteLine(reader2[1]);
 
 
                 }
-                Console.ReadLine();
+                Console.WriteLine();
+                Console.WriteLine();
+
+                Console.Write("do you want to delete or edit your listing?[del/edit]");
+                string y = Console.ReadLine();
+                switch (y)
+                {
+                    case "del":
+                        delListing(id);
+                        break;
+                    case "edit":
+                        editListing(id);
+                        break;
+                    default:
+                        Console.WriteLine("Invalid");
+                        break;
+                }
             }
             else
-                Console.WriteLine("No results");
-            Console.Write("[del/edit]");
-            string y = Console.ReadLine();
-            switch (y)
             {
-                case "del":
-                    delListing(id);
-                    break;
-                case "edit":
-                    editListing(id);
-                    break;
-                default:
-                    Console.WriteLine("Invalid");
-                    break;
+                Console.WriteLine("No results");
+                Console.Write("click enter to return to main menu");
+                Console.ReadLine();
             }
             conn.Close();
 
         }
 
-        static int cantThinkOfANameRn(string[] text)
+        static int cantThinkOfANameRn(string[] text, int uid)
         {
 
 
@@ -392,7 +394,7 @@ namespace ConsoleApp9
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    Console.Write(i+1);
+                    Console.Write(i + 1);
                     Console.Write(".");
                     Console.WriteLine(text[i]);
                 }
@@ -404,9 +406,14 @@ namespace ConsoleApp9
 
 
                 Console.WriteLine();
-                Console.WriteLine(spcnum+1);
+                Console.WriteLine(spcnum + 1);
                 Console.WriteLine();
                 Console.WriteLine("use up and down arrows to choose");
+                Console.WriteLine();
+                Console.Write("user id:");
+                Console.WriteLine(uid);
+                Console.WriteLine("(if user id is 0 then you are not logged in)");
+
 
                 if (pos >= text.Length)
                     pos--;
@@ -415,10 +422,10 @@ namespace ConsoleApp9
                 else
                     switch (Console.ReadKey().Key)
                     {
-                        case ConsoleKey.UpArrow:
+                        case ConsoleKey.DownArrow:
                             pos++;
                             break;
-                        case ConsoleKey.DownArrow:
+                        case ConsoleKey.UpArrow:
                             pos--;
                             break;
                         case ConsoleKey.Enter:
@@ -434,7 +441,7 @@ namespace ConsoleApp9
         static void addListing(int userid)
         {
             string price, quantity, title, description;
-            SqlConnection conn = new SqlConnection(Key);
+            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
             conn.Open();
 
             Console.Write("Title:");
@@ -464,7 +471,7 @@ namespace ConsoleApp9
 
             SqlCommand addlisting;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("insert into[listings] (title, price, views, user_id, category_id, quantity, description) values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", title, price, 0, userid, cantThinkOfANameRn(categorytab) + 1, quantity, description);
+            string sql = string.Format("insert into[listings] (title, price, views, user_id, category_id, quantity, description) values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", title, price, 0, userid, cantThinkOfANameRn(categorytab, userid) + 1, quantity, description);
             addlisting = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
@@ -473,35 +480,50 @@ namespace ConsoleApp9
 
         static void Main(string[] args)
         {
-            Boolean isLoggedIn = true;
+            Boolean isLoggedIn = false;
             int userid = 0;
-            string[] myAcc = new string[] { "Login", "Register" };
+            string[] myAcc = new string[] { "Login", "Register new account", "edit" };
             string[] hub = new string[] { "Search", "My account", "My listings" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing" };
             while (true)
             {
-                switch (cantThinkOfANameRn(hub))
+                switch (cantThinkOfANameRn(hub, userid))
                 {
                     case 0:
                         search();
+                        Console.Write("click enter to return to main menu");
+                        Console.ReadLine();
                         break;
 
                     case 1:
-                        if (cantThinkOfANameRn(myAcc) == 0)
+                        if (cantThinkOfANameRn(myAcc, userid) == 0)
                         {
-                            userid = login();
-                            isLoggedIn = true;
+                            userid = login(isLoggedIn);
+                            if (userid != 0)
+                            {
+                                Console.Write("user id:");
+                                Console.WriteLine(userid);
+                                Console.WriteLine("(if user id is 0 then you are not logged in)");
+                                Console.Write("click enter to return to main menu");
+                                Console.ReadLine();
+                                isLoggedIn = true;
+                            }
                         }
                         else
                         {
                             userid = register();
                             isLoggedIn = true;
+                            Console.Write("user id:");
+                            Console.WriteLine(userid);
+                            Console.WriteLine("(if user id is 0 then you are not logged in)");
+                            Console.Write("click enter to return to main menu");
+                            Console.ReadLine();
                         }
                         break;
 
                     case 2:
                         if (isLoggedIn)
-                            switch (cantThinkOfANameRn(meinListings))
+                            switch (cantThinkOfANameRn(meinListings, userid))
                             {
                                 case 0:
                                     myListings(userid);
@@ -514,12 +536,16 @@ namespace ConsoleApp9
                             }
 
                         else
+                        {
                             Console.WriteLine("Please log in first");
+                            Console.Write("click enter to return to main menu");
+                            Console.ReadLine();
+                        }
                         break;
 
                 }
             }
-            
+
 
 
 
