@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics.Metrics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Xml.Linq;
 
 
@@ -10,8 +11,9 @@ namespace ConsoleApp9
 {
     internal class Program
     {
+        private string key;
 
-
+        public string Key { get => key; set => key = value; }
 
         static string lenght(int max, int min, string var, string varName)
         {
@@ -32,12 +34,9 @@ namespace ConsoleApp9
             return var;
         }
 
-
-
-
         static int register()
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Key);
             conn.Open();
 
             string login, fName, lName, password, phoneNumber, description, country, city, street;
@@ -115,7 +114,7 @@ namespace ConsoleApp9
         static int selectId(string password, string loginsql)
         {
             int id = 0;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Key);
             conn.Open();
 
 
@@ -155,6 +154,7 @@ namespace ConsoleApp9
             return id;
             conn.Close();
         }
+
         static int login()
         {
             int id = 0;
@@ -164,7 +164,7 @@ namespace ConsoleApp9
             Console.Write("Password:");
             password = Console.ReadLine();
 
-            string connectionString = @"Data Source=(localdb)\local;Integrated Security=True;Connect Timeout=30";
+            string connectionString = @Key;
             SqlConnection conn = new SqlConnection(connectionString); 
             conn.Open();
 
@@ -211,11 +211,9 @@ namespace ConsoleApp9
             //end of select
         }
 
-
-
         static void search()
         {
-            string connectionString = @"Data Source=(localdb)\local;Integrated Security=True;Connect Timeout=30";
+            string connectionString = @Key;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -265,9 +263,72 @@ namespace ConsoleApp9
 
         }
 
+        static void editListing(int id)
+        {
+            SqlConnection conn = new SqlConnection();
+            conn.Open();
+            string title;
+            Console.Write("Title:");
+            title = Console.ReadLine();
+
+
+            string price, quantity, newtitle, description;
+
+
+            Console.Write("New title:");
+            newtitle = Console.ReadLine();
+            newtitle = lenght(50, 2, title, "New title");
+            Console.Write("Price:");
+            price = Console.ReadLine();
+            price = lenght(7, 1, price, "Price");
+            Console.Write("Quantity:");
+            quantity = Console.ReadLine();
+            quantity = lenght(1, 1, quantity, "Quantity");
+            Console.Write("Description:");
+            description = Console.ReadLine();
+            description = lenght(500, 0, description, "Description");
+
+            string[] categorytab = new string[] {
+                "toys",
+                "digital services",
+                "cosmetics and body care",
+                "food and beverage",
+                "health and wellness",
+                "household items",
+                "media",
+                "pet care",
+                "office equipment"};
+
+
+            SqlCommand editListing;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE ID = {5};", cantThinkOfANameRn(categorytab), newtitle, price, quantity, description);
+            editListing = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
+
+        static void delListing(int id)
+        {
+            SqlConnection conn = new SqlConnection(Key);
+            conn.Open();
+            string title;
+            Console.Write("Title:");
+            title = Console.ReadLine();
+
+            SqlCommand delListing;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("delete from listings where title = '{0}' and user_id = '{1}'", title, id);
+            delListing = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
+
         static void myListings(int id)
         {
-            SqlConnection conn = new SqlConnection("workstation id = application.mssql.somee.com; packet size = 4096; user id = app_SQLLogin_1; pwd = yespassword; data source = application.mssql.somee.com; persist security info = False; initial catalog = application");
+            SqlConnection conn = new SqlConnection(Key);
             conn.Open();
 
 
@@ -300,10 +361,23 @@ namespace ConsoleApp9
             }
             else
                 Console.WriteLine("No results");
+            Console.Write("[del/edit]");
+            string y = Console.ReadLine();
+            switch (y)
+            {
+                case "del":
+                    delListing(id);
+                    break;
+                case "edit":
+                    editListing(id);
+                    break;
+                default:
+                    Console.WriteLine("Invalid");
+                    break;
+            }
             conn.Close();
 
         }
-
 
         static int cantThinkOfANameRn(string[] text)
         {
@@ -357,11 +431,10 @@ namespace ConsoleApp9
             }
         }
 
-
         static void addListing(int userid)
         {
             string price, quantity, title, description;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Key);
             conn.Open();
 
             Console.Write("Title:");
@@ -398,94 +471,55 @@ namespace ConsoleApp9
             conn.Close();
         }
 
-
-        static void editListing(int id)
-        {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
-            conn.Open();
-            string title;
-            Console.Write("Title:");
-            title = Console.ReadLine();
-
-
-            string price, quantity, newtitle, description;
-            
-
-            Console.Write("New title:");
-            newtitle = Console.ReadLine();
-            newtitle = lenght(50, 2, title, "New title");
-            Console.Write("Price:");
-            price = Console.ReadLine();
-            price = lenght(7, 1, price, "Price");
-            Console.Write("Quantity:");
-            quantity = Console.ReadLine();
-            quantity = lenght(1, 1, quantity, "Quantity");
-            Console.Write("Description:");
-            description = Console.ReadLine();
-            description = lenght(500, 0, description, "Description");
-            string[] categorytab = new string[] {
-                "toys",
-                "digital services",
-                "cosmetics and body care",
-                "food and beverage",
-                "health and wellness",
-                "household items",
-                "media",
-                "pet care",
-                "office equipment"};
-
-
-            SqlCommand editListing;
-            SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE ID = {5};", cantThinkOfANameRn(categorytab), newtitle, price, quantity, description);
-            editListing = new SqlCommand(sql, conn);
-            adapter.InsertCommand = new SqlCommand(sql, conn);
-            adapter.InsertCommand.ExecuteNonQuery();
-            conn.Close();
-        }
-
-        static void delListing(int id)
-        {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
-            conn.Open();
-            string title;
-            Console.Write("Title:");
-            title = Console.ReadLine();
-
-            SqlCommand delListing;
-            SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("delete from listings where title = '{0}' and user_id = '{1}'",title,id);
-            delListing = new SqlCommand(sql, conn);
-            adapter.InsertCommand = new SqlCommand(sql, conn);
-            adapter.InsertCommand.ExecuteNonQuery();
-            conn.Close();
-        }
         static void Main(string[] args)
         {
             Boolean isLoggedIn = true;
             int userid = 0;
             string[] myAcc = new string[] { "Login", "Register" };
             string[] hub = new string[] { "Search", "My account", "My listings" };
-            switch (cantThinkOfANameRn(hub))
+            string[] meinListings = new string[] { "edit/delete listing", "Create listing" };
+            while (true)
             {
-                case 0:
-                    search();
-                    break;
+                switch (cantThinkOfANameRn(hub))
+                {
+                    case 0:
+                        search();
+                        break;
 
-                case 1:
-                    if (cantThinkOfANameRn(myAcc) == 0)
-                        userid = login();
-                    else
-                        userid = register();
-                    break;
+                    case 1:
+                        if (cantThinkOfANameRn(myAcc) == 0)
+                        {
+                            userid = login();
+                            isLoggedIn = true;
+                        }
+                        else
+                        {
+                            userid = register();
+                            isLoggedIn = true;
+                        }
+                        break;
 
-                case 2:
-                    myListings(2);
-                    break;
+                    case 2:
+                        if (isLoggedIn)
+                            switch (cantThinkOfANameRn(meinListings))
+                            {
+                                case 0:
+                                    myListings(userid);
+                                    break;
 
+                                case 1:
+                                    addListing(userid);
+                                    break;
 
+                            }
 
+                        else
+                            Console.WriteLine("Please log in first");
+                        break;
+
+                }
             }
+            
 
 
 
