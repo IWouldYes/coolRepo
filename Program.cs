@@ -252,7 +252,7 @@ namespace ConsoleApp9
 
                 SqlCommand searchcomm = new SqlCommand();
                 searchcomm.Connection = conn;
-                searchcomm.CommandText = string.Format("select title, price, description, quantity from [listings] where id = '{0}'", id);
+                searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number] FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] WHERE [listings].[id] = '{0}';", id);
 
 
                 //liczba kolumn
@@ -272,14 +272,13 @@ namespace ConsoleApp9
                 {
                     while (reader2.Read())
                     {
-                        for (int i = 0; i < numberOfColumns; i++)
-                        {
-                            Console.Write(columnNames[i]);
-                            Console.Write(": ");
-                            Console.WriteLine(reader2[i]);
-                        }
-                        Console.WriteLine();
-
+                    Console.WriteLine(reader2[3]);
+                    Console.WriteLine(reader2[2]+"zł");
+                    Console.WriteLine();
+                    Console.WriteLine(reader2[0] + " " + reader2[1]);
+                    Console.WriteLine("Phone number: " + reader2[5]);
+                    Console.WriteLine();
+                    Console.WriteLine(reader2[4]);
 
                     };
                 }
