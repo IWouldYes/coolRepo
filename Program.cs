@@ -1,4 +1,4 @@
-
+﻿
 
 
 
@@ -19,21 +19,59 @@ namespace ConsoleApp9
                 Console.WriteLine(varName + " is too short, it must be at least " + min + " characters long, please try again");
                 Console.Write(varName + ":");
                 var = Console.ReadLine();
-                Console.Clear();
+
             }
             while (var.Length > max)
             {
                 Console.WriteLine(varName + " is too long, it must be less than " + max + " characters long, please try again");
                 Console.Write(varName + ":");
                 var = Console.ReadLine();
-                Console.Clear();
+
             }
             return var;
         }
+        
+        static void selectName(int userid)
+        {
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
 
+
+
+            //selectowanie wszystkiego z wybranej tabeli i schemy
+            SqlCommand login = new SqlCommand();
+            login.Connection = conn;
+            login.CommandText = string.Format("select first_name, last_name from [User] where id = '{0}'; ", userid);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = login.ExecuteReader();
+
+
+
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    Console.Write("Logged in as ");
+                    Console.Write(reader2[0]);
+                    Console.Write(" ");
+                    Console.WriteLine(reader2[1]);
+
+                }
+            }
+            else
+                Console.WriteLine("Not logged in");
+            conn.Close();
+        
+    }
+        
         static int register()
         {
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
             string login, fName, lName, password, phoneNumber, description, country, city, street;
@@ -111,7 +149,7 @@ namespace ConsoleApp9
         static int selectId(string password, string loginsql)
         {
             int id = 0;
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
 
@@ -124,14 +162,8 @@ namespace ConsoleApp9
 
             //liczba kolumn
             SqlDataReader reader2 = login.ExecuteReader();
-            int numberOfColumns = reader2.FieldCount;
 
 
-            string[] columnNames = new string[numberOfColumns];
-            for (int i = 0; i < numberOfColumns; i++)
-            {
-                columnNames[i] = reader2.GetName(i);
-            }
 
 
 
@@ -140,10 +172,8 @@ namespace ConsoleApp9
             {
                 while (reader2.Read())
                 {
-                    for (int i = 0; i < numberOfColumns; i++)
-                    {
+
                         id = (int)reader2[0];
-                    }
 
 
                 }
@@ -161,7 +191,7 @@ namespace ConsoleApp9
             Console.Write("Password:");
             password = Console.ReadLine();
 
-            string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
             conn.Open();
 
@@ -212,9 +242,55 @@ namespace ConsoleApp9
             //end of select
         }
 
-        static void search()
+        static void dLD(int id)
         {
-            string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
+                string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
+                SqlConnection conn = new SqlConnection(connectionString);
+
+                conn.Open();
+
+
+                SqlCommand searchcomm = new SqlCommand();
+                searchcomm.Connection = conn;
+                searchcomm.CommandText = string.Format("select title, price, description, quantity from [listings] where id = '{0}'", id);
+
+
+                //liczba kolumn
+                SqlDataReader reader2 = searchcomm.ExecuteReader();
+                int numberOfColumns = reader2.FieldCount;
+
+                //nazwy kolumn
+                string[] columnNames = new string[numberOfColumns];
+                for (int i = 0; i < numberOfColumns; i++)
+                {
+                    columnNames[i] = reader2.GetName(i);
+                }
+
+
+
+                if (reader2.HasRows)
+                {
+                    while (reader2.Read())
+                    {
+                        for (int i = 0; i < numberOfColumns; i++)
+                        {
+                            Console.Write(columnNames[i]);
+                            Console.Write(": ");
+                            Console.WriteLine(reader2[i]);
+                        }
+                        Console.WriteLine();
+
+
+                    };
+                }
+                else
+                    Console.WriteLine("No results");
+                conn.Close();
+
+        }
+        static void search(int uid)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -225,37 +301,27 @@ namespace ConsoleApp9
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("select title, price, description, quantity from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
+            searchcomm.CommandText = string.Format("select id, title, price from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
 
 
             //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
-            int numberOfColumns = reader2.FieldCount;
 
-            //nazwy kolumn
-            string[] columnNames = new string[numberOfColumns];
-            for (int i = 0; i < numberOfColumns; i++)
-            {
-                columnNames[i] = reader2.GetName(i);
-            }
-
-
+            string[] serch = new string[20];
+            int[] choose = new int[20];
+            int i = 0;
 
             Console.WriteLine();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
                 {
-                    for (int i = 0; i < numberOfColumns; i++)
-                    {
-                        Console.Write(columnNames[i]);
-                        Console.Write(": ");
-                        Console.WriteLine(reader2[i]);
-                    }
-                    Console.WriteLine();
-
-
-                };
+                    Console.WriteLine("Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n");
+                    serch[i] = "Title: " + reader2[1] + "\n  Price: " + reader2[2] + "\n";
+                    choose[i] = (int)reader2[0];
+                    i++;
+                }
+                dLD(choose[cantThinkOfANameRn(serch, uid)]);
             }
             else
                 Console.WriteLine("No results");
@@ -265,7 +331,7 @@ namespace ConsoleApp9
 
         static void editListing(int id)
         {
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
             string title;
             Console.Write("Title of the listing you want to change:");
@@ -311,7 +377,7 @@ namespace ConsoleApp9
 
         static void delListing(int id)
         {
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
             string title;
             Console.Write("Title of the listing you want to delete:");
@@ -328,7 +394,7 @@ namespace ConsoleApp9
 
         static void myListings(int id)
         {
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
 
@@ -394,9 +460,17 @@ namespace ConsoleApp9
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    Console.Write(i + 1);
-                    Console.Write(".");
-                    Console.WriteLine(text[i]);
+                    if (pos == i)
+                    {
+                        Console.Write("> ");
+                        Console.WriteLine(text[i]);
+                    }
+                    else
+                    {
+                        Console.Write("  ");
+                        Console.WriteLine(text[i]);
+                    }
+
                 }
 
                 for (int i = 0; i < pos; i++)
@@ -404,15 +478,12 @@ namespace ConsoleApp9
                     spcnum += 1;
                 }
 
-
-                Console.WriteLine();
-                Console.WriteLine(spcnum + 1);
-                Console.WriteLine();
+                Console.WriteLine("――――――――――――――――――――――――――――――――");
                 Console.WriteLine("use up and down arrows to choose");
                 Console.WriteLine();
-                Console.Write("user id:");
-                Console.WriteLine(uid);
-                Console.WriteLine("(if user id is 0 then you are not logged in)");
+                selectName(uid);
+
+
 
 
                 if (pos >= text.Length)
@@ -441,7 +512,7 @@ namespace ConsoleApp9
         static void addListing(int userid)
         {
             string price, quantity, title, description;
-            SqlConnection conn = new SqlConnection("Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;");
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
             Console.Write("Title:");
@@ -482,42 +553,45 @@ namespace ConsoleApp9
         {
             Boolean isLoggedIn = false;
             int userid = 0;
-            string[] myAcc = new string[] { "Login", "Register new account", "edit" };
+            string[] myAcc = new string[] { "Login", "Register new account", "Edit account", "Back" };
             string[] hub = new string[] { "Search", "My account", "My listings" };
-            string[] meinListings = new string[] { "edit/delete listing", "Create listing" };
+            string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
             while (true)
             {
                 switch (cantThinkOfANameRn(hub, userid))
                 {
                     case 0:
-                        search();
+                        search(userid);
                         Console.Write("click enter to return to main menu");
                         Console.ReadLine();
                         break;
 
                     case 1:
-                        if (cantThinkOfANameRn(myAcc, userid) == 0)
+                        switch (cantThinkOfANameRn(myAcc, userid))
                         {
-                            userid = login(isLoggedIn);
-                            if (userid != 0)
-                            {
-                                Console.Write("user id:");
-                                Console.WriteLine(userid);
-                                Console.WriteLine("(if user id is 0 then you are not logged in)");
+                            case 0:
+
+                                userid = login(isLoggedIn);
+                                if (userid != 0)
+                                {
+                                    selectName(userid);
+                                    Console.Write("click enter to return to main menu");
+                                    Console.ReadLine();
+                                    isLoggedIn = true;
+                                }
+                                break;
+
+                            case 1:
+                                userid = register();
+                                isLoggedIn = true;
+                                selectName(userid);
                                 Console.Write("click enter to return to main menu");
                                 Console.ReadLine();
-                                isLoggedIn = true;
-                            }
-                        }
-                        else
-                        {
-                            userid = register();
-                            isLoggedIn = true;
-                            Console.Write("user id:");
-                            Console.WriteLine(userid);
-                            Console.WriteLine("(if user id is 0 then you are not logged in)");
-                            Console.Write("click enter to return to main menu");
-                            Console.ReadLine();
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                break;
                         }
                         break;
 
@@ -553,37 +627,6 @@ namespace ConsoleApp9
 
 
 
-            /*switch (cantThinkOfANameRn(hub))
-            {
-                case 0:
-                    search();
-                    break;
-
-                case 1:
-                    if (cantThinkOfANameRn(myAcc) == 0)
-                        userid = login();
-                    else
-                        register();
-                    break;
-
-                case 2:
-                    if (isLoggedIn)
-                        addListing(userid);
-                    else
-                    {
-                        Console.WriteLine("You need to create a new account first or login");
-
-
-                        if (cantThinkOfANameRn(myAcc) == 0)
-                            login();
-                        else
-                            register();
-                        isLoggedIn = true;
-
-
-                    }
-                    break;
-            }*/
         }
     }
 }
