@@ -2,6 +2,7 @@
 
 
 
+using System;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -319,9 +320,12 @@ namespace ConsoleApp9
                     {
                         Array.Resize(ref serch, i);
                         Array.Resize(ref choose, i);
+                        i--; // decrement i to avoid overwriting the next element
                     }
                     else
+                    {
                         i++;
+                    }
 
                 }
                 dLD(choose[cantThinkOfANameRn(serch, uid)]);
@@ -559,15 +563,15 @@ namespace ConsoleApp9
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
-Console.Writeline("------------------------------");
-string message = Console.ReadLine();
+            Console.WriteLine("――――――――――――――――――――――――――――――――");
+            string message = Console.ReadLine();
             
 
 
 
             SqlCommand send;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("insert into[messages] (sender_id, recipient_id, [content]) values ('{0}','{1}','{2}')", sendid, recid, message);
+            string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", sendid, recid, message);
             send = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
@@ -634,8 +638,11 @@ string message = Console.ReadLine();
             {
                 while (reader2.Read())
                 {
-                    serch[i] = (string)reader2[0] + reader2[1];
-                    choose[i] = (int)reader2[2];
+                    if (Array.IndexOf(choose, reader2[2]) == -1)
+                    {
+                        serch[i] = (string)reader2[0] + reader2[1];
+                        choose[i] = (int)reader2[2];
+                    }
 
 
 
@@ -643,9 +650,13 @@ string message = Console.ReadLine();
                     {
                         Array.Resize(ref serch, i);
                         Array.Resize(ref choose, i);
+                        i--; // decrement i to avoid overwriting the next element
                     }
                     else
+                    {
                         i++;
+                    }
+
 
                 }
                 showChat(choose[cantThinkOfANameRn(serch, uid)],uid);
@@ -656,6 +667,7 @@ string message = Console.ReadLine();
             conn.Close();
 
         }
+
         static void Main(string[] args)
         {
             Boolean isLoggedIn = false;
@@ -726,6 +738,12 @@ string message = Console.ReadLine();
                     case 3:
                         if (isLoggedIn)
                             Chat(userid);
+                        else
+                        {
+                            Console.WriteLine("Please log in first");
+                            Console.Write("click enter to return to main menu");
+                            Console.ReadLine();
+                        }
                         break;
 
                 }
