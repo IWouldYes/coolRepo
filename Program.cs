@@ -559,13 +559,15 @@ namespace ConsoleApp9
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
 
+Console.Writeline("------------------------------");
+string message = Console.ReadLine();
             
 
 
 
             SqlCommand send;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("insert into[messages] (sender_id, recipient_id, [content]) values ('{0}','{1}','{2}')", ,,);
+            string sql = string.Format("insert into[messages] (sender_id, recipient_id, [content]) values ('{0}','{1}','{2}')", sendid, recid, message);
             send = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
@@ -601,7 +603,7 @@ namespace ConsoleApp9
             }
             else
                 Console.WriteLine("No results");
-            Console.ReadLine();
+            writeChat(recid, sendid);
             conn.Close();
 
         }
