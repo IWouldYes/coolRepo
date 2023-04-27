@@ -646,7 +646,7 @@ namespace ConsoleApp9
 
 
 
-                    if (serch[i] is null)
+                    /*if (serch[i] is null)
                     {
                         Array.Resize(ref serch, i);
                         Array.Resize(ref choose, i);
@@ -655,7 +655,7 @@ namespace ConsoleApp9
                     else
                     {
                         i++;
-                    }
+                    }*/
 
 
                 }
