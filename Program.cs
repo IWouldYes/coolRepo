@@ -30,7 +30,7 @@ namespace ConsoleApp9
             }
             return var;
         }
-        
+
         static void selectName(int userid)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
@@ -66,9 +66,9 @@ namespace ConsoleApp9
             else
                 Console.WriteLine("Not logged in");
             conn.Close();
-        
-    }
-        
+
+        }
+
         static int register()
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
@@ -173,7 +173,7 @@ namespace ConsoleApp9
                 while (reader2.Read())
                 {
 
-                        id = (int)reader2[0];
+                    id = (int)reader2[0];
 
 
                 }
@@ -244,40 +244,40 @@ namespace ConsoleApp9
 
         static void dLD(int id)
         {
-                string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
-                SqlConnection conn = new SqlConnection(connectionString);
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
 
-                conn.Open();
-
-
-                SqlCommand searchcomm = new SqlCommand();
-                searchcomm.Connection = conn;
-                searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number] FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] WHERE [listings].[id] = '{0}';", id);
+            conn.Open();
 
 
-                //liczba kolumn
-                SqlDataReader reader2 = searchcomm.ExecuteReader();
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number] FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] WHERE [listings].[id] = '{0}';", id);
 
 
-                
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-                if (reader2.HasRows)
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
                 {
-                    while (reader2.Read())
-                    {
                     Console.WriteLine(reader2[3]);
-                    Console.WriteLine(reader2[2]+"zł");
+                    Console.WriteLine(reader2[2] + "zł");
                     Console.WriteLine();
                     Console.WriteLine(reader2[0] + " " + reader2[1]);
                     Console.WriteLine("Phone number: " + reader2[5]);
                     Console.WriteLine();
                     Console.WriteLine(reader2[4]);
 
-                    };
-                }
-                else
-                    Console.WriteLine("No results");
-                conn.Close();
+                };
+            }
+            else
+                Console.WriteLine("No results");
+            conn.Close();
 
         }
 
@@ -300,8 +300,8 @@ namespace ConsoleApp9
             //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-            string[] serch = new string[2];
-            int[] choose = new int[2];
+            string[] serch = new string[19];
+            int[] choose = new int[19];
             int i = 0;
 
             Console.WriteLine();
@@ -314,7 +314,7 @@ namespace ConsoleApp9
                     choose[i] = (int)reader2[0];
 
 
-                    
+
                     if (serch[i] is null)
                     {
                         Array.Resize(ref serch, i);
@@ -553,12 +553,113 @@ namespace ConsoleApp9
             conn.Close();
         }
 
+        static void writeChat(int recid, int sendid)
+        {
+
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+            
+
+
+
+            SqlCommand send;
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = string.Format("insert into[messages] (sender_id, recipient_id, [content]) values ('{0}','{1}','{2}')", ,,);
+            send = new SqlCommand(sql, conn);
+            adapter.InsertCommand = new SqlCommand(sql, conn);
+            adapter.InsertCommand.ExecuteNonQuery();
+            conn.Close();
+        }
+
+        static void showChat(int recid, int sendid)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
+            conn.Open();
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [messages].[message_content] \r\nFROM [user] \r\nJOIN [messages] ON [user].[id] = [messages].[recipient_id] \r\nWHERE [messages].[recipient_id] = {0} or [messages].[sender_id] = {0} or [messages].[recipient_id] = {1} or [messages].[sender_id] = {1};", recid, sendid);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    Console.WriteLine("["+reader2[0] + " " + reader2[1]+"]" + "\n" +reader2[2] + "\n");
+
+                }
+            }
+            else
+                Console.WriteLine("No results");
+            Console.ReadLine();
+            conn.Close();
+
+        }
+
+        static void Chat(int uid)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
+            conn.Open();
+
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [user].[id] FROM[user] JOIN[messages] ON[user].[id] = [messages].[recipient_id] WHERE[messages].[sender_id] = {0};", uid);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+            string[] serch = new string[19];
+            int[] choose = new int[19];
+            int i = 0;
+
+            Console.WriteLine();
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    serch[i] = (string)reader2[0] + reader2[1];
+                    choose[i] = (int)reader2[2];
+
+
+
+                    if (serch[i] is null)
+                    {
+                        Array.Resize(ref serch, i);
+                        Array.Resize(ref choose, i);
+                    }
+                    else
+                        i++;
+
+                }
+                showChat(choose[cantThinkOfANameRn(serch, uid)],uid);
+            }
+            else
+                Console.WriteLine("No results");
+
+            conn.Close();
+
+        }
         static void Main(string[] args)
         {
             Boolean isLoggedIn = false;
             int userid = 0;
             string[] myAcc = new string[] { "Login", "Register new account", "Edit account", "Back" };
-            string[] hub = new string[] { "Search", "My account", "My listings" };
+            string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
             while (true)
             {
@@ -620,6 +721,10 @@ namespace ConsoleApp9
                             Console.ReadLine();
                         }
                         break;
+                    case 3:
+                        if (isLoggedIn)
+                            Chat(userid);
+                        break;
 
                 }
             }
@@ -635,3 +740,10 @@ namespace ConsoleApp9
     }
 }
 
+
+
+
+
+
+
+   
