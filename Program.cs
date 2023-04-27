@@ -244,7 +244,7 @@ namespace ConsoleApp9
 
         static void dLD(int id)
         {
-                string connectionString = @"Server=192.168.0.109;Database=yesyesnono;User Id=1ht;Password=1ht;";
+                string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
                 SqlConnection conn = new SqlConnection(connectionString);
 
                 conn.Open();
@@ -257,16 +257,9 @@ namespace ConsoleApp9
 
                 //liczba kolumn
                 SqlDataReader reader2 = searchcomm.ExecuteReader();
-                int numberOfColumns = reader2.FieldCount;
-
-                //nazwy kolumn
-                string[] columnNames = new string[numberOfColumns];
-                for (int i = 0; i < numberOfColumns; i++)
-                {
-                    columnNames[i] = reader2.GetName(i);
-                }
 
 
+                
 
                 if (reader2.HasRows)
                 {
@@ -287,6 +280,7 @@ namespace ConsoleApp9
                 conn.Close();
 
         }
+
         static void search(int uid)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
@@ -306,8 +300,8 @@ namespace ConsoleApp9
             //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-            string[] serch = new string[20];
-            int[] choose = new int[20];
+            string[] serch = new string[2];
+            int[] choose = new int[2];
             int i = 0;
 
             Console.WriteLine();
@@ -318,12 +312,23 @@ namespace ConsoleApp9
                     Console.WriteLine("Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n");
                     serch[i] = "Title: " + reader2[1] + "\n  Price: " + reader2[2] + "\n";
                     choose[i] = (int)reader2[0];
-                    i++;
+
+
+                    
+                    if (serch[i] is null)
+                    {
+                        Array.Resize(ref serch, i);
+                        Array.Resize(ref choose, i);
+                    }
+                    else
+                        i++;
+
                 }
                 dLD(choose[cantThinkOfANameRn(serch, uid)]);
             }
             else
                 Console.WriteLine("No results");
+
             conn.Close();
 
         }
@@ -501,7 +506,6 @@ namespace ConsoleApp9
                         case ConsoleKey.Enter:
                             Console.Clear();
                             return pos;
-                            Thread.Sleep(5000);
                             Console.Clear();
                             break;
                     }
@@ -520,6 +524,7 @@ namespace ConsoleApp9
             Console.Write("Price:");
             price = Console.ReadLine();
             price = lenght(7, 1, price, "Price");
+            price = price.Replace(',', '.');
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
             quantity = lenght(1, 1, quantity, "Quantity");
