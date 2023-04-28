@@ -588,11 +588,50 @@ namespace ConsoleApp9
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [messages].[message_content] \r\nFROM [user] \r\nJOIN [messages] ON [user].[id] = [messages].[recipient_id] \r\nWHERE [messages].[recipient_id] = {0} or [messages].[sender_id] = {0} or [messages].[recipient_id] = {1} or [messages].[sender_id] = {1};", recid, sendid);
+            string query = string.Format(
+           "SELECT [user].[first_name], [user].[last_name], [messages].[message_content] " +
+            "FROM [user] JOIN [messages] ON [user].[id] = [messages].[recipient_id] " +
+            "WHERE [messages].[recipient_id] = {0} AND [messages].[sender_id] = {1}; " +
+            "SELECT [user].[first_name], [user].[last_name], [messages].[message_content] " +
+            "FROM [user] JOIN [messages] ON [user].[id] = [messages].[recipient_id] " +
+            "WHERE [messages].[recipient_id] = {1} AND [messages].[sender_id] = {0};",
+            recid, sendid);
 
 
-            //liczba kolumn
-            SqlDataReader reader2 = searchcomm.ExecuteReader();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    using (SqlCommand command = new SqlCommand(query, connection))
+    {
+        connection.Open();
+
+        using (SqlDataReader reader = command.ExecuteReader())
+        {
+            // Read the first result set
+            while (reader.Read())
+            {
+                string firstName = reader.GetString(0);
+                string lastName = reader.GetString(1);
+                string messageContent = reader.GetString(2);
+
+                // Do something with the data
+            }
+
+            // Move to the next result set
+            reader.NextResult();
+
+            // Read the second result set
+            while (reader.Read())
+            {
+                string firstName = reader.GetString(0);
+                string lastName = reader.GetString(1);
+                string messageContent = reader.GetString(2);
+
+                // Do something with the data
+            }
+        }
+    }
+}
+
 
 
 
