@@ -5,14 +5,12 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
 
 namespace ConsoleApp9
 {
     internal class Program
     {
-
-
-
         static string lenght(int max, int min, string var, string varName)
         {
             while (var.Length < min)
@@ -243,7 +241,7 @@ namespace ConsoleApp9
             //end of select
         }
 
-        static void dLD(int id)
+        static void dUD(int uid)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -253,7 +251,66 @@ namespace ConsoleApp9
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number] FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] WHERE [listings].[id] = '{0}';", id);
+            searchcomm.CommandText = string.Format("SELECT [first_name], [last_name], [phone_number], [description] FROM [user] where id = '{0}'",uid);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+
+
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    Console.WriteLine(reader2[0]+" " + reader2[1]);
+                    Console.WriteLine("Phone number:"+ reader2[2]);
+                    Console.WriteLine(reader2[3]);
+                };
+            }
+            else
+                Console.WriteLine("No results");
+            conn.Close();
+
+        }
+
+        static void wyswietlaedkl(int lid)
+        {
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("SELECT [views] FROM [listings] WHERE [listings].[id] = '{0}';", lid);
+
+            int views = 0;
+            using (SqlDataReader reader = searchcomm.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    views = (int)reader["views"];
+                }
+            }
+
+            string updateSql = string.Format("UPDATE [listings] SET views = '{0}' WHERE id = '{1}';", views + 1, lid);
+            SqlCommand updateCommand = new SqlCommand(updateSql, conn);
+            updateCommand.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        
+        static void dLD(int lid,int uid)
+        {//dLD - display Listing Data
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
+            conn.Open();
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id] FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] WHERE [listings].[id] = '{0}';", lid);
 
 
             //liczba kolumn
@@ -273,11 +330,25 @@ namespace ConsoleApp9
                     Console.WriteLine("Phone number: " + reader2[5]);
                     Console.WriteLine();
                     Console.WriteLine(reader2[4]);
-
+                    wyswietlaedkl(lid);
+                    string[] authordetails = { "Check author profile", "Main menu" };
+                    Console.WriteLine("Click enter to see author profile or return to main menu");
+                    Console.ReadLine();
+                    switch (cantThinkOfANameRn(authordetails, uid))
+                    {
+                        case 0:
+                            dUD((int)reader2[6]);
+                            break;
+                        case 1:
+                            return;
+                    }
                 };
             }
             else
                 Console.WriteLine("No results");
+            
+
+
             conn.Close();
 
         }
@@ -328,7 +399,7 @@ namespace ConsoleApp9
                     }
 
                 }
-                dLD(choose[cantThinkOfANameRn(serch, uid)]);
+                dLD(choose[cantThinkOfANameRn(serch, uid)], uid);
             }
             else
                 Console.WriteLine("No results");
@@ -345,9 +416,20 @@ namespace ConsoleApp9
             Console.Write("Title of the listing you want to change:");
             title = Console.ReadLine();
 
+            // Check if the listing exists
+            SqlCommand checkListingCmd = new SqlCommand("SELECT COUNT(*) FROM Listings WHERE Title = @Title AND user_id = @UserId", conn);
+            checkListingCmd.Parameters.AddWithValue("@Title", title);
+            checkListingCmd.Parameters.AddWithValue("@UserId", id);
+            int listingCount = (int)checkListingCmd.ExecuteScalar();
+
+            if (listingCount == 0)
+            {
+                Console.WriteLine("Listing with the specified title does not exist.");
+                conn.Close();
+                return;
+            }
 
             string price, quantity, newtitle, description;
-
 
             Console.Write("New title:");
             newtitle = Console.ReadLine();
@@ -363,26 +445,26 @@ namespace ConsoleApp9
             description = lenght(500, 0, description, "Description");
 
             string[] categorytab = new string[] {
-                "toys",
-                "digital services",
-                "cosmetics and body care",
-                "food and beverage",
-                "health and wellness",
-                "household items",
-                "media",
-                "pet care",
-                "office equipment"};
-
+        "toys",
+        "digital services",
+        "cosmetics and body care",
+        "food and beverage",
+        "health and wellness",
+        "household items",
+        "media",
+        "pet care",
+        "office equipment"};
 
             SqlCommand editListing;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE user_id = '{5}';", cantThinkOfANameRn(categorytab, id), newtitle, price, quantity, description, id);
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE user_id = '{5}' AND Title = '{6}';",
+                cantThinkOfANameRn(categorytab, id), newtitle, price, quantity, description, id, title);
             editListing = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
         }
-
+        
         static void delListing(int id)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
@@ -428,20 +510,20 @@ namespace ConsoleApp9
 
                 }
                 Console.WriteLine();
-                Console.WriteLine();
+                Console.WriteLine("click enter to Edit, Delete or Leave");
+                Console.ReadLine();
 
-                Console.Write("do you want to delete or edit your listing?[del/edit]");
-                string y = Console.ReadLine();
-                switch (y)
+
+                string[] y = { "Delete", "Edit", "Main menu" };
+                switch (cantThinkOfANameRn(y, id))
                 {
-                    case "del":
+                    case 0:
                         delListing(id);
                         break;
-                    case "edit":
+                    case 1:
                         editListing(id);
                         break;
-                    default:
-                        Console.WriteLine("Invalid");
+                    case 2:
                         break;
                 }
             }
@@ -531,7 +613,7 @@ namespace ConsoleApp9
             price = price.Replace(',', '.');
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
-            quantity = lenght(1, 1, quantity, "Quantity");
+            quantity = lenght(3, 1, quantity, "Quantity");
             Console.Write("Description:");
             description = Console.ReadLine();
             description = lenght(500, 0, description, "Description");
@@ -559,22 +641,40 @@ namespace ConsoleApp9
 
         static void writeChat(int recid, int sendid)
         {
-
+            string message;
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
+            bool isnotesc = true;
+            string[] writemessageui = { "Write message", "See chat", "Main menu" };
 
-            Console.WriteLine("――――――――――――――――――――――――――――――――");
-            string message = Console.ReadLine();
-            
+            while (isnotesc)
+            {
+                Console.WriteLine("――――――click enter to write message or leave―――――――");
+                Console.ReadLine();
+                switch (cantThinkOfANameRn(writemessageui, sendid))
+                {
+                    case 2:
+                        return;
+                    case 0:
+                        Console.WriteLine("Write Message");
+                        Console.Write(":");
+                        message = Console.ReadLine();
+                        SqlCommand send;
+                        SqlDataAdapter adapter = new SqlDataAdapter();
+                        string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", sendid, recid, message);
+                        send = new SqlCommand(sql, conn);
+                        adapter.InsertCommand = new SqlCommand(sql, conn);
+                        adapter.InsertCommand.ExecuteNonQuery();
+
+                        break;
+                    case 1:
+                        showChat(recid, sendid);
+                        break;
+                }
+            }
 
 
 
-            SqlCommand send;
-            SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", sendid, recid, message);
-            send = new SqlCommand(sql, conn);
-            adapter.InsertCommand = new SqlCommand(sql, conn);
-            adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
         }
 
@@ -585,31 +685,47 @@ namespace ConsoleApp9
 
             conn.Open();
 
+            string query = string.Format(
+               "SELECT [sender].[first_name] AS [sender_first_name], [sender].[last_name] AS [sender_last_name], " +
+               "[recipient].[first_name] AS [recipient_first_name], [recipient].[last_name] AS [recipient_last_name], " +
+               "[messages].[message_content] " +
+               "FROM [messages] " +
+               "INNER JOIN [user] AS [sender] ON [messages].[sender_id] = [sender].[id] " +
+               "INNER JOIN [user] AS [recipient] ON [messages].[recipient_id] = [recipient].[id] " +
+               "WHERE ([messages].[recipient_id] = {0} AND [messages].[sender_id] = {1}) " +
+               "   OR ([messages].[recipient_id] = {1} AND [messages].[sender_id] = {0}) " +
+               "ORDER BY [messages].[id];",
+               recid, sendid);
 
-            SqlCommand searchcomm = new SqlCommand();
-            searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [messages].[message_content] \r\nFROM [user] \r\nJOIN [messages] ON [user].[id] = [messages].[recipient_id] \r\nWHERE [messages].[recipient_id] = {0} or [messages].[sender_id] = {0} or [messages].[recipient_id] = {1} or [messages].[sender_id] = {1};", recid, sendid);
-
-
-            //liczba kolumn
-            SqlDataReader reader2 = searchcomm.ExecuteReader();
-
-
-
-
-            if (reader2.HasRows)
+            using (SqlCommand command = new SqlCommand(query, conn))
             {
-                while (reader2.Read())
+                using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    Console.WriteLine("["+reader2[0] + " " + reader2[1]+"]" + "\n" +reader2[2] + "\n");
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            string senderFirstName = reader.GetString(0);
+                            string senderLastName = reader.GetString(1);
+                            string recipientFirstName = reader.GetString(2);
+                            string recipientLastName = reader.GetString(3);
+                            string messageContent = reader.GetString(4);
 
+                            string recipientName = $"{senderFirstName} {senderLastName}";
+                            string senderName = $"{recipientFirstName} {recipientLastName}";
+
+                            Console.WriteLine($"[{senderName}]\n {messageContent}\n");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No results");
+                    }
                 }
             }
-            else
-                Console.WriteLine("No results");
+
             writeChat(recid, sendid);
             conn.Close();
-
         }
 
         static void Chat(int uid)
@@ -759,11 +875,3 @@ namespace ConsoleApp9
         }
     }
 }
-
-
-
-
-
-
-
-   
