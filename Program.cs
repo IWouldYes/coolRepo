@@ -791,12 +791,25 @@ namespace ConsoleApp9
             string[] myAcc = new string[] { "Login", "Register new account", "Edit account", "Back" };
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
+
+string[] searchui = {"Search Listing", "Search User", " Filters"}
             while (true)
             {
                 switch (cantThinkOfANameRn(hub, userid))
                 {
                     case 0:
-                        search(userid);
+switch(CantThinkOfANameRn(searchui)) 
+{
+case 0:
+search(userid);
+break;
+case 1:
+break;
+case 2:
+break;
+}
+
+                        
                         Console.Write("click enter to return to main menu");
                         Console.ReadLine();
                         break;
