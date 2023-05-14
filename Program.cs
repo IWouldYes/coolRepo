@@ -241,41 +241,56 @@ namespace ConsoleApp9
             //end of select
         }
 
-        static void dUD(int uid)
-        {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
-            SqlConnection conn = new SqlConnection(connectionString);
+        static void dUD(int uid,int muid)
+        {//display user data
+            while (true)
+            {
+                string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+                SqlConnection conn = new SqlConnection(connectionString);
 
-            conn.Open();
-
-
-            SqlCommand searchcomm = new SqlCommand();
-            searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("SELECT [first_name], [last_name], [phone_number], [description] FROM [user] where id = '{0}'",uid);
+                conn.Open();
 
 
-            //liczba kolumn
-            SqlDataReader reader2 = searchcomm.ExecuteReader();
+                SqlCommand searchcomm = new SqlCommand();
+                searchcomm.Connection = conn;
+                searchcomm.CommandText = string.Format("SELECT [first_name], [last_name], [phone_number], [description] FROM [user] where id = '{0}'", uid);
 
 
+                //liczba kolumn
+                SqlDataReader reader2 = searchcomm.ExecuteReader();
 
+
+                string[] authorActions = { "Message author", "Main menu" };
 
             if (reader2.HasRows)
-            {
-                while (reader2.Read())
                 {
-                    Console.WriteLine(reader2[0]+" " + reader2[1]);
-                    Console.WriteLine("Phone number:"+ reader2[2]);
-                    Console.WriteLine(reader2[3]);
-                };
-            }
-            else
-                Console.WriteLine("No results");
-            conn.Close();
+                    while (reader2.Read())
+                    {
+                        Console.WriteLine(reader2[0] + " " + reader2[1]);
+                        Console.WriteLine("Phone number:" + reader2[2]);
+                        Console.WriteLine(reader2[3]);
+                    };
+                }
+                else
+                    Console.WriteLine("No results");
+                Console.Write("Click enter to open action menu");
+                Console.ReadLine();
+                switch(cantThinkOfANameRn(authorActions, muid))
+                {
+                    case 0:
+                        //message author
+                        break;
+                    case 1:
+                        //main menu
+                        return;
+                }
 
+                conn.Close();
+
+            }
         }
 
-        static void wyswietlaedkl(int lid)
+        static void viewsCounter(int lid)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
@@ -330,14 +345,14 @@ namespace ConsoleApp9
                     Console.WriteLine("Phone number: " + reader2[5]);
                     Console.WriteLine();
                     Console.WriteLine(reader2[4]);
-                    wyswietlaedkl(lid);
+                    viewsCounter(lid);
                     string[] authordetails = { "Check author profile", "Main menu" };
                     Console.WriteLine("Click enter to see author profile or return to main menu");
                     Console.ReadLine();
                     switch (cantThinkOfANameRn(authordetails, uid))
                     {
                         case 0:
-                            dUD((int)reader2[6]);
+                            dUD((int)reader2[6],uid);
                             break;
                         case 1:
                             return;
@@ -353,7 +368,7 @@ namespace ConsoleApp9
 
         }
 
-        static void search(int uid)
+        static void searchListing(int uid)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -400,6 +415,61 @@ namespace ConsoleApp9
 
                 }
                 dLD(choose[cantThinkOfANameRn(serch, uid)], uid);
+            }
+            else
+                Console.WriteLine("No results");
+
+            conn.Close();
+
+        }
+        static void searchUser(int uid)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
+            conn.Open();
+
+            Console.Write("Search:");
+            string search = Console.ReadLine();
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("select id, first_name, last_name, phone_number from [user] where first_name LIKE '%{0}%' or last_name LIKE '%{0}%' or description LIKE '%{0}%'", search);
+
+
+            //liczba kolumn
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+            string[] serch = new string[19];
+            int[] choose = new int[19];
+            int i = 0;
+
+            Console.WriteLine();
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    Console.WriteLine(reader2[1] + " " + reader2[2] + "\n" + reader2[3]);
+                    serch[i] = reader2[1] + " " + reader2[2] + "\n" + reader2[3];
+                    choose[i] = (int)reader2[0];
+
+
+
+                    if (serch[i] is null)
+                    {
+                        Array.Resize(ref serch, i);
+                        Array.Resize(ref choose, i);
+                        i--; // decrement i to avoid overwriting the next element
+                    }
+                    else
+                    {
+                        i++;
+                    }
+
+                }
+                dUD(choose[cantThinkOfANameRn(serch, uid)],uid);
+                //gives id of chosen user
             }
             else
                 Console.WriteLine("No results");
@@ -780,7 +850,12 @@ Console. WriteLine(reader2[2]);
                 showChat(choose[cantThinkOfANameRn(serch, uid)],uid);
             }
             else
+            {
                 Console.WriteLine("No results");
+                Console.WriteLine("Click enter to return to main menu");
+                Console.ReadLine();
+            }
+                
 
             conn.Close();
 
@@ -794,25 +869,28 @@ Console. WriteLine(reader2[2]);
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
 
-string[] searchui = {"Search Listing", "Search User", " Filters"}
+            string[] searchui = { "Search Listing", "Search User", "Filters","Back" };
             while (true)
             {
                 switch (cantThinkOfANameRn(hub, userid))
                 {
                     case 0:
-switch(CantThinkOfANameRn(searchui)) 
-{
-case 0:
-search(userid);
-break;
-case 1:
-break;
-case 2:
-break;
-}
+                        switch(cantThinkOfANameRn(searchui, userid)) 
+                        {
+                            case 0:
+                                //search listing
+                                searchListing(userid);
+                                break;
+                            case 1:
+                                //search user
+                                searchUser(userid);
+                                break;
+                            case 2:
+                                //filters
+                                break;
+                        }
 
-                        
-                        Console.Write("click enter to return to main menu");
+                        Console.Write("Click enter to return to main menu");
                         Console.ReadLine();
                         break;
 
