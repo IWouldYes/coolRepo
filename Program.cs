@@ -491,7 +491,7 @@ namespace ConsoleApp9
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("select title, price from [listings] where user_id = '{0}'", id);
+            searchcomm.CommandText = string.Format("select title, price, views from [listings] where user_id = '{0}'", id);
 
 
             //liczba kolumn
@@ -506,6 +506,8 @@ namespace ConsoleApp9
                     Console.WriteLine(reader2[0]);
                     Console.Write("price:");
                     Console.WriteLine(reader2[1]);
+Console.Write("views:");
+Console. WriteLine(reader2[2]);
 
 
                 }
