@@ -5,12 +5,74 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace ConsoleApp9
 {
     internal class Program
     {
+        static int cantThinkOfANameRn(string[] text, int uid)
+        {
+
+
+            int pos = 0;
+            int txtsum;
+            while (true)
+            {
+                Console.Clear();
+                int spcnum = 0;
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (pos == i)
+                    {
+                        Console.Write("> ");
+                        Console.WriteLine(text[i]);
+                    }
+                    else
+                    {
+                        Console.Write("  ");
+                        Console.WriteLine(text[i]);
+                    }
+
+                }
+
+                for (int i = 0; i < pos; i++)
+                {
+                    spcnum += 1;
+                }
+
+                Console.WriteLine("――――――――――――――――――――――――――――――――");
+                Console.WriteLine("use up and down arrows to choose");
+                Console.WriteLine();
+                selectName(uid);
+
+
+
+
+                if (pos >= text.Length)
+                    pos--;
+                else if (pos < 0)
+                    pos++;
+                else
+                    switch (Console.ReadKey().Key)
+                    {
+                        case ConsoleKey.DownArrow:
+                            pos++;
+                            break;
+                        case ConsoleKey.UpArrow:
+                            pos--;
+                            break;
+                        case ConsoleKey.Enter:
+                            Console.Clear();
+                            return pos;
+                            Console.Clear();
+                            break;
+                    }
+            }
+        }
+
         static string lenght(int max, int min, string var, string varName)
         {
             while (var.Length < min)
@@ -241,6 +303,34 @@ namespace ConsoleApp9
             //end of select
         }
 
+        static void messageAuthor(int recid, int sendid)
+        {
+            string message;
+            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            conn.Open();
+
+            if (sendid!=0)
+            {
+                Console.WriteLine("Write Message");
+                Console.WriteLine("Senderid - " + sendid + " recipientid - " + recid);
+                Console.Write(":");
+                message = Console.ReadLine();
+                SqlCommand send;
+                SqlDataAdapter adapter = new SqlDataAdapter();
+                string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", recid, sendid, message);
+                send = new SqlCommand(sql, conn);
+                adapter.InsertCommand = new SqlCommand(sql, conn);
+                adapter.InsertCommand.ExecuteNonQuery();
+                Console.Clear();
+            }
+            else
+            {
+                Console.WriteLine("Please log in first");
+                Thread.Sleep(1000);
+                return;
+            }
+        }
+
         static void dUD(int uid, int muid)
         {//display user data
             while (true)
@@ -253,7 +343,7 @@ namespace ConsoleApp9
 
                 SqlCommand searchcomm = new SqlCommand();
                 searchcomm.Connection = conn;
-                searchcomm.CommandText = string.Format("SELECT [first_name], [last_name], [phone_number], [description] FROM [user] where id = '{0}'", uid);
+                searchcomm.CommandText = string.Format("SELECT [first_name], [last_name], [phone_number], [description], [country],[city],[street] FROM [user] where id = '{0}'", uid);
 
 
                 //liczba kolumn
@@ -269,6 +359,8 @@ namespace ConsoleApp9
                         Console.WriteLine(reader2[0] + " " + reader2[1]);
                         Console.WriteLine("Phone number:" + reader2[2]);
                         Console.WriteLine(reader2[3]);
+                        Console.WriteLine(reader2[4]);
+                        Console.WriteLine(reader2[5]+" "+ reader2[6]);
                     };
                 }
                 else
@@ -279,6 +371,8 @@ namespace ConsoleApp9
                 {
                     case 0:
                         //message author
+                        messageAuthor(uid, muid);
+
                         break;
                     case 1:
                         //main menu
@@ -374,106 +468,73 @@ namespace ConsoleApp9
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
-
             Console.Write("Search:");
             string search = Console.ReadLine();
-
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
             searchcomm.CommandText = string.Format("select id, title, price from [listings] where title LIKE '%{0}%' or description LIKE '%{0}%'", search);
-
-
-            //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-            string[] serch = new string[19];
-            int[] choose = new int[19];
-            int i = 0;
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
 
-            Console.WriteLine();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
                 {
-                    Console.WriteLine("Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n");
-                    serch[i] = "Title: " + reader2[1] + "\n  Price: " + reader2[2] + "\n";
-                    choose[i] = (int)reader2[0];
+                    string fullName = "Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n";
+                    int userId = (int)reader2[0];
 
-
-
-                    if (serch[i] is null)
+                    if (!name.Contains(fullName)) // Check if the name already exists in the list
                     {
-                        Array.Resize(ref serch, i);
-                        Array.Resize(ref choose, i);
-                        i--; // decrement i to avoid overwriting the next element
+                        name.Add(fullName);
+                        id.Add(userId);
                     }
-                    else
-                    {
-                        i++;
-                    }
-
                 }
-                dLD(choose[cantThinkOfANameRn(serch, uid)], uid);
             }
-            else
-                Console.WriteLine("No results");
 
+            dLD(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
             conn.Close();
 
         }
+
         static void searchUser(int uid)
         {
+            Console.Write("Search:");
+            string search = Console.ReadLine();
+
+
+
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
 
-            Console.Write("Search:");
-            string search = Console.ReadLine();
-
-
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
             searchcomm.CommandText = string.Format("select id, first_name, last_name, phone_number from [user] where first_name LIKE '%{0}%' or last_name LIKE '%{0}%' or description LIKE '%{0}%'", search);
-
-
-            //liczba kolumn
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-            string[] serch = new string[19];
-            int[] choose = new int[19];
-            int i = 0;
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
 
-            Console.WriteLine();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
                 {
-                    Console.WriteLine(reader2[1] + " " + reader2[2] + "\n" + reader2[3]);
-                    serch[i] = reader2[1] + " " + reader2[2] + "\n" + reader2[3];
-                    choose[i] = (int)reader2[0];
+                    string fullName = reader2[1] + " " + reader2[2] + "\n" + "phone:" + reader2[3]+"\n";
+                    int userId = (int)reader2[0];
 
-
-
-                    if (serch[i] is null)
+                    if (!name.Contains(fullName)) // Check if the name already exists in the list
                     {
-                        Array.Resize(ref serch, i);
-                        Array.Resize(ref choose, i);
-                        i--; // decrement i to avoid overwriting the next element
+                        name.Add(fullName);
+                        id.Add(userId);
                     }
-                    else
-                    {
-                        i++;
-                    }
-
                 }
-                dUD(choose[cantThinkOfANameRn(serch, uid)], uid);
-                //gives id of chosen user
             }
-            else
-                Console.WriteLine("No results");
 
+            dUD(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
             conn.Close();
 
         }
@@ -609,67 +670,6 @@ namespace ConsoleApp9
 
         }
 
-        static int cantThinkOfANameRn(string[] text, int uid)
-        {
-
-
-            int pos = 0;
-            int txtsum;
-            while (true)
-            {
-                Console.Clear();
-                int spcnum = 0;
-
-                for (int i = 0; i < text.Length; i++)
-                {
-                    if (pos == i)
-                    {
-                        Console.Write("> ");
-                        Console.WriteLine(text[i]);
-                    }
-                    else
-                    {
-                        Console.Write("  ");
-                        Console.WriteLine(text[i]);
-                    }
-
-                }
-
-                for (int i = 0; i < pos; i++)
-                {
-                    spcnum += 1;
-                }
-
-                Console.WriteLine("――――――――――――――――――――――――――――――――");
-                Console.WriteLine("use up and down arrows to choose");
-                Console.WriteLine();
-                selectName(uid);
-
-
-
-
-                if (pos >= text.Length)
-                    pos--;
-                else if (pos < 0)
-                    pos++;
-                else
-                    switch (Console.ReadKey().Key)
-                    {
-                        case ConsoleKey.DownArrow:
-                            pos++;
-                            break;
-                        case ConsoleKey.UpArrow:
-                            pos--;
-                            break;
-                        case ConsoleKey.Enter:
-                            Console.Clear();
-                            return pos;
-                            Console.Clear();
-                            break;
-                    }
-            }
-        }
-
         static void addListing(int userid)
         {
             string price, quantity, title, description;
@@ -718,22 +718,25 @@ namespace ConsoleApp9
             conn.Open();
             bool isnotesc = true;
             string[] writemessageui = { "Write message", "See chat", "Main menu" };
-
             while (isnotesc)
             {
-                Console.WriteLine("――――――click enter to write message or leave―――――――");
+
+                Console.WriteLine("――――――Click enter to open action menu or leave―――――――");
                 Console.ReadLine();
+
                 switch (cantThinkOfANameRn(writemessageui, sendid))
                 {
                     case 2:
+                        isnotesc = false;
                         return;
                     case 0:
                         Console.WriteLine("Write Message");
+                        Console.WriteLine("Senderid - "+sendid+" recipientid - "+recid);
                         Console.Write(":");
                         message = Console.ReadLine();
                         SqlCommand send;
                         SqlDataAdapter adapter = new SqlDataAdapter();
-                        string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", sendid, recid, message);
+                        string sql = string.Format("insert into [messages] (sender_id, recipient_id, message_content) values ('{1}','{0}','{2}')", recid, sendid, message);
                         send = new SqlCommand(sql, conn);
                         adapter.InsertCommand = new SqlCommand(sql, conn);
                         adapter.InsertCommand.ExecuteNonQuery();
@@ -783,8 +786,8 @@ namespace ConsoleApp9
                             string recipientLastName = reader.GetString(3);
                             string messageContent = reader.GetString(4);
 
-                            string recipientName = $"{senderFirstName} {senderLastName}";
-                            string senderName = $"{recipientFirstName} {recipientLastName}";
+                            string senderName = $"{senderFirstName} {senderLastName}";
+                            string recipientName = $"{recipientFirstName} {recipientLastName}";
 
                             Console.WriteLine($"[{senderName}]\n {messageContent}\n");
                         }
@@ -807,58 +810,31 @@ namespace ConsoleApp9
 
             conn.Open();
 
-
-
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("SELECT [user].[first_name], [user].[last_name], [user].[id] FROM[user] JOIN[messages] ON[user].[id] = [messages].[recipient_id] WHERE[messages].[sender_id] = {0};", uid);
-
-
-            //liczba kolumn
+            searchcomm.CommandText = string.Format("SELECT [user].[first_name],[user].[last_name],[user].[id] FROM [user] JOIN [messages] ON [user].[id] = [messages].[sender_id] WHERE [messages].[recipient_id] = {0};", uid);
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-            string[] serch = new string[19];
-            int[] choose = new int[19];
-            int i = 0;
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
 
-            Console.WriteLine();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
                 {
-                    if (Array.IndexOf(choose, reader2[2]) == -1)
+                    string fullName = reader2[0] + " " + reader2[1];
+                    int userId = (int)reader2[2];
+
+                    if (!name.Contains(fullName)) // Check if the name already exists in the list
                     {
-                        serch[i] = (string)reader2[0] + reader2[1];
-                        choose[i] = (int)reader2[2];
+                        name.Add(fullName);
+                        id.Add(userId);
                     }
-
-
-
-                    /*if (serch[i] is null)
-                    {
-                        Array.Resize(ref serch, i);
-                        Array.Resize(ref choose, i);
-                        i--; // decrement i to avoid overwriting the next element
-                    }
-                    else
-                    {
-                        i++;
-                    }*/
-
-
                 }
-                showChat(choose[cantThinkOfANameRn(serch, uid)], uid);
-            }
-            else
-            {
-                Console.WriteLine("No results");
-                Console.WriteLine("Click enter to return to main menu");
-                Console.ReadLine();
             }
 
-
+            showChat(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
             conn.Close();
-
         }
 
         static void Main(string[] args)
@@ -887,11 +863,11 @@ namespace ConsoleApp9
                                 break;
                             case 2:
                                 //filters
+                                Console.WriteLine("under construction, click enter to return to main menu");
+                                Console.ReadLine();
                                 break;
                         }
 
-                        Console.Write("Click enter to return to main menu");
-                        Console.ReadLine();
                         break;
 
                     case 1:
