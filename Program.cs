@@ -241,7 +241,7 @@ namespace ConsoleApp9
             //end of select
         }
 
-        static void dUD(int uid,int muid)
+        static void dUD(int uid, int muid)
         {//display user data
             while (true)
             {
@@ -262,7 +262,7 @@ namespace ConsoleApp9
 
                 string[] authorActions = { "Message author", "Main menu" };
 
-            if (reader2.HasRows)
+                if (reader2.HasRows)
                 {
                     while (reader2.Read())
                     {
@@ -275,7 +275,7 @@ namespace ConsoleApp9
                     Console.WriteLine("No results");
                 Console.Write("Click enter to open action menu");
                 Console.ReadLine();
-                switch(cantThinkOfANameRn(authorActions, muid))
+                switch (cantThinkOfANameRn(authorActions, muid))
                 {
                     case 0:
                         //message author
@@ -314,8 +314,8 @@ namespace ConsoleApp9
 
             conn.Close();
         }
-        
-        static void dLD(int lid,int uid)
+
+        static void dLD(int lid, int uid)
         {//dLD - display Listing Data
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -352,7 +352,7 @@ namespace ConsoleApp9
                     switch (cantThinkOfANameRn(authordetails, uid))
                     {
                         case 0:
-                            dUD((int)reader2[6],uid);
+                            dUD((int)reader2[6], uid);
                             break;
                         case 1:
                             return;
@@ -361,7 +361,7 @@ namespace ConsoleApp9
             }
             else
                 Console.WriteLine("No results");
-            
+
 
 
             conn.Close();
@@ -468,7 +468,7 @@ namespace ConsoleApp9
                     }
 
                 }
-                dUD(choose[cantThinkOfANameRn(serch, uid)],uid);
+                dUD(choose[cantThinkOfANameRn(serch, uid)], uid);
                 //gives id of chosen user
             }
             else
@@ -534,7 +534,7 @@ namespace ConsoleApp9
             adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
         }
-        
+
         static void delListing(int id)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
@@ -576,8 +576,8 @@ namespace ConsoleApp9
                     Console.WriteLine(reader2[0]);
                     Console.Write("price:");
                     Console.WriteLine(reader2[1]);
-Console.Write("views:");
-Console. WriteLine(reader2[2]);
+                    Console.Write("views:");
+                    Console.WriteLine(reader2[2]);
 
 
                 }
@@ -847,7 +847,7 @@ Console. WriteLine(reader2[2]);
 
 
                 }
-                showChat(choose[cantThinkOfANameRn(serch, uid)],uid);
+                showChat(choose[cantThinkOfANameRn(serch, uid)], uid);
             }
             else
             {
@@ -855,7 +855,7 @@ Console. WriteLine(reader2[2]);
                 Console.WriteLine("Click enter to return to main menu");
                 Console.ReadLine();
             }
-                
+
 
             conn.Close();
 
@@ -869,13 +869,13 @@ Console. WriteLine(reader2[2]);
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
 
-            string[] searchui = { "Search Listing", "Search User", "Filters","Back" };
+            string[] searchui = { "Search Listing", "Search User", "Filters", "Back" };
             while (true)
             {
                 switch (cantThinkOfANameRn(hub, userid))
                 {
                     case 0:
-                        switch(cantThinkOfANameRn(searchui, userid)) 
+                        switch (cantThinkOfANameRn(searchui, userid))
                         {
                             case 0:
                                 //search listing
