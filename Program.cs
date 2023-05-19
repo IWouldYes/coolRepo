@@ -803,7 +803,7 @@ namespace ConsoleApp9
             conn.Close();
         }
 
-        static void Chat(int uid)
+        static void chat(int uid)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -836,6 +836,8 @@ namespace ConsoleApp9
             showChat(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
             conn.Close();
         }
+
+        static void filters();
 
         static void Main(string[] args)
         {
