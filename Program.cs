@@ -5,8 +5,10 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ConsoleApp9
 {
@@ -73,23 +75,45 @@ namespace ConsoleApp9
             }
         }
 
-        static string lenght(int max, int min, string var, string varName)
+        static string lenght(int maxLength, int minLength, string variable, string variableName, bool isNumber)
         {
-            while (var.Length < min)
+            while (variable.Length < minLength || variable.Length > maxLength)
             {
-                Console.WriteLine(varName + " is too short, it must be at least " + min + " characters long, please try again");
-                Console.Write(varName + ":");
-                var = Console.ReadLine();
+                if (variable.Length < minLength)
+                {
+                    Console.WriteLine($"{variableName} is too short. It must be at least {minLength} characters long. Please try again.");
+                }
+                else if (variable.Length > maxLength)
+                {
+                    Console.WriteLine($"{variableName} is too long. It must be less than or equal to {maxLength} characters long. Please try again.");
+                }
 
+                Console.Write($"{variableName}: ");
+                variable = Console.ReadLine();
             }
-            while (var.Length > max)
+
+            if (isNumber)
             {
-                Console.WriteLine(varName + " is too long, it must be less than " + max + " characters long, please try again");
-                Console.Write(varName + ":");
-                var = Console.ReadLine();
+                bool isNumeric = true;
+                foreach (char c in variable)
+                {
+                    if (!char.IsDigit(c))
+                    {
+                        isNumeric = false;
+                        break;
+                    }
+                }
 
+                if (!isNumeric)
+                {
+                    Console.WriteLine($"{variableName} is invalid. It must be a number. Please try again.");
+                    Console.Write($"{variableName}: ");
+                    variable = Console.ReadLine();
+                    variable = lenght(minLength, maxLength, variable, variableName, isNumber);
+                }
             }
-            return var;
+
+            return variable;
         }
 
         static void selectName(int userid)
@@ -138,7 +162,7 @@ namespace ConsoleApp9
             string login, fName, lName, password, phoneNumber, description, country, city, street;
             Console.Write("Login:");
             login = Console.ReadLine();
-            login = lenght(30, 3, login, "Login");
+            login = lenght(30, 3, login, "Login", false);
 
 
 
@@ -163,30 +187,30 @@ namespace ConsoleApp9
 
             Console.Write("First name:");
             fName = Console.ReadLine();
-            fName = lenght(50, 2, fName, "First name");
+            fName = lenght(50, 2, fName, "First name", false);
             Console.WriteLine("Your first name is: " + fName);
 
             Console.Write("Last name:");
             lName = Console.ReadLine();
-            lName = lenght(50, 2, lName, "Last name");
+            lName = lenght(50, 2, lName, "Last name", false);
             Console.Write("Password:");
             password = Console.ReadLine();
-            password = lenght(30, 4, password, "Password");
+            password = lenght(30, 4, password, "Password", false);
             Console.Write("Phone number:");
             phoneNumber = Console.ReadLine();
-            phoneNumber = lenght(9, 3, phoneNumber, "Phone number");
+            phoneNumber = lenght(9, 3, phoneNumber, "Phone number", true);
             Console.Write("Description(not required so you can leave empty):");
             description = Console.ReadLine();
-            description = lenght(500, 0, description, "Description");
+            description = lenght(500, 0, description, "Description", false);
             Console.Write("Country:");
             country = Console.ReadLine();
-            country = lenght(30, 0, country, "Country");
+            country = lenght(30, 0, country, "Country",false);
             Console.Write("City:");
             city = Console.ReadLine();
-            city = lenght(50, 0, city, "City");
+            city = lenght(50, 0, city, "City", false);
             Console.Write("Street:");
             street = Console.ReadLine();
-            street = lenght(50, 0, street, "Street");
+            street = lenght(50, 0, street, "Street", false);
 
             country = country.ToLower();
             city = city.ToLower();
@@ -350,7 +374,7 @@ namespace ConsoleApp9
                 SqlDataReader reader2 = searchcomm.ExecuteReader();
 
 
-                string[] authorActions = { "Message author", "Main menu" };
+                string[] authorActions = { "Message author","Comment", "Main menu" };
 
                 if (reader2.HasRows)
                 {
@@ -440,7 +464,7 @@ namespace ConsoleApp9
                     Console.WriteLine();
                     Console.WriteLine(reader2[4]);
                     viewsCounter(lid);
-                    string[] authordetails = { "Check author profile", "Main menu" };
+                    string[] authordetails = { "Check author profile","Post a review", "Main menu" };
                     Console.WriteLine("Click enter to see author profile or return to main menu");
                     Console.ReadLine();
                     switch (cantThinkOfANameRn(authordetails, uid))
@@ -564,16 +588,16 @@ namespace ConsoleApp9
 
             Console.Write("New title:");
             newtitle = Console.ReadLine();
-            newtitle = lenght(50, 2, title, "New title");
+            newtitle = lenght(50, 2, title, "New title", false);
             Console.Write("Price:");
             price = Console.ReadLine();
-            price = lenght(7, 1, price, "Price");
+            price = lenght(7, 1, price, "Price", true);
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
-            quantity = lenght(1, 1, quantity, "Quantity");
+            quantity = lenght(3, 1, quantity, "Quantity", true);
             Console.Write("Description:");
             description = Console.ReadLine();
-            description = lenght(500, 0, description, "Description");
+            description = lenght(500, 0, description, "Description", false);
 
             string[] categorytab = new string[] {
         "toys",
@@ -678,17 +702,17 @@ namespace ConsoleApp9
 
             Console.Write("Title:");
             title = Console.ReadLine();
-            title = lenght(50, 2, title, "Title");
+            title = lenght(50, 2, title, "Title", false);
             Console.Write("Price:");
             price = Console.ReadLine();
-            price = lenght(7, 1, price, "Price");
+            price = lenght(7, 1, price, "Price", true);
             price = price.Replace(',', '.');
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
-            quantity = lenght(3, 1, quantity, "Quantity");
+            quantity = lenght(3, 1, quantity, "Quantity", true);
             Console.Write("Description:");
             description = Console.ReadLine();
-            description = lenght(500, 0, description, "Description");
+            description = lenght(500, 0, description, "Description", false);
             string[] categorytab = new string[] {
                 "toys",
                 "digital services",
@@ -836,8 +860,83 @@ namespace ConsoleApp9
             showChat(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
             conn.Close();
         }
+        static void mainsearch(int uid,string search)
+        {
 
-        static void filters();
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
+            conn.Open();
+
+
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format(search);
+            Console.WriteLine(search);
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
+
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    string fullName = "Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n";
+                    int userId = (int)reader2[0];
+
+                    if (!name.Contains(fullName)) // Check if the name already exists in the list
+                    {
+                        name.Add(fullName);
+                        id.Add(userId);
+                    }
+                }
+            }
+
+            dLD(id[cantThinkOfANameRn(name.ToArray(), uid)], uid);
+            conn.Close();
+
+        }
+
+        static void Filters(int uid)
+        {
+            string[] categorytab = new string[] {
+        "toys",
+        "digital services",
+        "cosmetics and body care",
+        "food and beverage",
+        "health and wellness",
+        "household items",
+        "media",
+        "pet care",
+        "office equipment"};
+
+            Console.WriteLine("Filters\n(leave blank for no restrictions)\n");
+            Console.Write("Price\nfrom: ");
+            string minprice = Console.ReadLine();
+            minprice = lenght(4, 1, minprice, "minimum price", true);
+            Console.Write("to: ");
+            string maxprice = Console.ReadLine();
+            maxprice = lenght(4, 1, maxprice, "maximum price", true);
+
+            int categoryid = cantThinkOfANameRn(categorytab, uid);
+
+            Console.Write("Views\nfrom: ");
+            string minviews = Console.ReadLine();
+            minviews = lenght(4, 1, minviews, "minimum views", true);
+            Console.Write("to: ");
+            string maxviews = Console.ReadLine();
+            maxviews = lenght(4, 1, maxviews, "maximum views", true);
+
+            Console.WriteLine("\nSelected Filters:");
+            Console.WriteLine($"Price: {minprice} - {maxprice}");
+            Console.WriteLine($"Category: {categorytab[categoryid]}");
+            Console.WriteLine($"Views: {minviews} - {maxviews}");
+
+            string sqlQuery = string.Format("SELECT id, title, price FROM listings WHERE Price >= {0} AND Price <= {1} AND category_id = {2} AND views >= {3} AND views <= {4}", minprice, maxprice, categoryid + 1, minviews, maxviews);
+            mainsearch(uid,sqlQuery);
+        }
+
 
         static void Main(string[] args)
         {
@@ -865,7 +964,7 @@ namespace ConsoleApp9
                                 break;
                             case 2:
                                 //filters
-                                Console.WriteLine("under construction, click enter to return to main menu");
+                                Filters(userid);
                                 Console.ReadLine();
                                 break;
                         }
@@ -924,7 +1023,7 @@ namespace ConsoleApp9
                         break;
                     case 3:
                         if (isLoggedIn)
-                            Chat(userid);
+                            chat(userid);
                         else
                         {
                             Console.WriteLine("Please log in first");
