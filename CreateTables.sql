@@ -49,23 +49,33 @@ create table [messages](
 ,[listing_id] int constraint FK_messages_listing_id references [listings](id) on delete no action
 );
 
-create table [comments](
+create table [reviews](
 [id] int identity(1,1) constraint PK_comments primary key
 ,[user_id] int not null constraint FK_comments_user_id references [user](id) on delete cascade
 ,[listing_id] int not null constraint FK_comments_Listing_id references [listings](id) on delete no action
 ,[content] varchar(300) not null
 );
 
-create table [reviews](
+create table [comments](
 [id] int identity(1,1) constraint PK_reviews primary key
-,[reviewer_id] int not null constraint FK_reviews_reviewer_id references [user](id) on delete cascade
-,[reviewee_id] int not null constraint FK_reviews_reviewee_id references [user](id) on delete no action
+,[commenter_id] int not null constraint FK_reviews_reviewer_id references [user](id) on delete cascade
+,[commentee_id] int not null constraint FK_reviews_reviewee_id references [user](id) on delete no action
 ,[content] varchar(300) not null
 );
 
-create table [ratings](
-[id] int identity(1,1) constraint PK_ratings primary key
-,[rater_id] int not null constraint FK_ratings_rater_id references [user](id) on delete no action
-,[ratee_id] int not null constraint FK_ratings_ratee_id references [user](id) on delete no action
-,[rating_value] int  not null
+CREATE TABLE [order_history](
+[id] int identity(1,1) CONSTRAINT PK_order_history PRIMARY KEY,
+[user_id] int NOT NULL CONSTRAINT FK_order_history_user_id REFERENCES [user](id) ON DELETE CASCADE,
+[listing_id] int NOT NULL CONSTRAINT FK_order_history_listing_id REFERENCES [listings](id) ON DELETE NO ACTION,
+[quantity] int NOT NULL,
+[price] float NOT NULL,
+[date_ordered] date NOT NULL
+);
+
+CREATE TABLE [cart](
+[id] int identity(1,1) CONSTRAINT PK_cart PRIMARY KEY,
+[user_id] int NOT NULL CONSTRAINT FK_cart_user_id REFERENCES [user](id) ON DELETE CASCADE,
+[listing_id] int NOT NULL CONSTRAINT FK_cart_listing_id REFERENCES [listings](id) ON DELETE NO ACTION,
+[quantity] int NOT NULL,
+[date_added] date NOT NULL
 );
