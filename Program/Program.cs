@@ -1,4 +1,4 @@
-﻿
+
 
 namespace ConsoleShop100percentLegitNoScam.Program
 {
@@ -10,27 +10,28 @@ namespace ConsoleShop100percentLegitNoScam.Program
             int userid = 0;
             string[] myAcc = new string[] { "Login", "Register new account", "Edit account", "Back" };
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
-            string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
-
+            string[] meinListings = new string[] { "Listing actions", "Create listing","Sales", "Back" };
             string[] searchui = { "Search Listing", "Search User", "Filters", "Back" };
+
+
             while (true)
             {
-                switch (Other.cantThinkOfANameRn(hub, userid))
+                switch (Other.cantThinkOfANameRn(hub, userid,"Main menu"))
                 {
                     case 0:
-                        switch (Other.cantThinkOfANameRn(searchui, userid))
+                        switch (Other.cantThinkOfANameRn(searchui, userid,"Search menu"))
                         {
                             case 0:
                                 //search listing
-                                Search.searchListing(userid);
+                                Search.searchListing(userid, isLoggedIn);
                                 break;
                             case 1:
                                 //search user
-                                Search.searchUser(userid);
+                                Search.searchUser(userid, isLoggedIn);
                                 break;
                             case 2:
                                 //filters
-                                Search.Filters(userid);
+                                Search.Filters(userid, isLoggedIn);
                                 Console.ReadLine();
                                 break;
                         }
@@ -38,7 +39,12 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         break;
 
                     case 1:
-                        switch (Other.cantThinkOfANameRn(myAcc, userid))
+                        string name;
+                        if (userid == 0)
+                            name = "My account";
+                        else
+                            name = Other.selectName(userid);
+                        switch (Other.cantThinkOfANameRn(myAcc, userid, name))
                         {
                             case 0:
 
@@ -55,7 +61,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                             case 1:
                                 userid = User.register();
                                 isLoggedIn = true;
-                                Other.selectName(userid);
+                                Console.WriteLine(Other.selectName(userid));
                                 Console.Write("click enter to return to main menu");
                                 Console.ReadLine();
                                 break;
@@ -68,7 +74,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                     case 2:
                         if (isLoggedIn)
-                            switch (Other.cantThinkOfANameRn(meinListings, userid))
+                            switch (Other.cantThinkOfANameRn(meinListings, userid, "Listings action menu"))
                             {
                                 case 0:
                                     Listing.myListings(userid);
