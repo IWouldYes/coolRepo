@@ -46,7 +46,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             conn.Close();
 
         }
-        public static int cantThinkOfANameRn(string[] text, int uid)
+        public static int cantThinkOfANameRn(string[] text, int uid, string startcontent)
         {
 
 
@@ -56,6 +56,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             {
                 Console.Clear();
                 int spcnum = 0;
+                Console.WriteLine(startcontent);Console.WriteLine("-------------------------");Console.WriteLine();
 
                 for (int i = 0; i < text.Length; i++)
                 {
