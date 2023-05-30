@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -12,32 +13,42 @@ namespace ConsoleShop100percentLegitNoScam.Program
 {
     public class Listing
     {
-        public static void editListing(int id)
+        public static void editListing(int uid)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+
             conn.Open();
-            string title;
-            Console.Write("Title of the listing you want to change:");
-            title = Console.ReadLine();
 
-            // Check if the listing exists
-            SqlCommand checkListingCmd = new SqlCommand("SELECT COUNT(*) FROM Listings WHERE Title = @Title AND user_id = @UserId", conn);
-            checkListingCmd.Parameters.AddWithValue("@Title", title);
-            checkListingCmd.Parameters.AddWithValue("@UserId", id);
-            int listingCount = (int)checkListingCmd.ExecuteScalar();
 
-            if (listingCount == 0)
+            SqlCommand searchcomm = new SqlCommand();
+            searchcomm.Connection = conn;
+            searchcomm.CommandText = string.Format("select id, title, price from [listings] where user_id = {0}", uid);
+            SqlDataReader reader2 = searchcomm.ExecuteReader();
+
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
+
+            if (reader2.HasRows)
             {
-                Console.WriteLine("Listing with the specified title does not exist.");
-                conn.Close();
-                return;
+                while (reader2.Read())
+                {
+                    string fullName = "Title: " + reader2[1] + "\nPrice: " + reader2[2] + "\n";
+                    int userId = (int)reader2[0];
+
+                    if (!name.Contains(fullName)) // Check if the name already exists in the list
+                    {
+                        name.Add(fullName);
+                        id.Add(userId);
+                    }
+                }
             }
-
+            reader2.Close();
             string price, quantity, newtitle, description;
-
+            int lid = id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Your listings")];
             Console.Write("New title:");
             newtitle = Console.ReadLine();
-            newtitle = Other.lenght(50, 2, title, "New title", false);
+            newtitle = Other.lenght(50, 2, newtitle, "New title", false);
             Console.Write("Price:");
             price = Console.ReadLine();
             price = Other.lenght(7, 1, price, "Price", true);
@@ -61,9 +72,8 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             SqlCommand editListing;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE user_id = '{5}' AND Title = '{6}';",
-                Other.cantThinkOfANameRn(categorytab, id), newtitle, price, quantity, description, id, title);
-            editListing = new SqlCommand(sql, conn);
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE id = '{5}';",Other.cantThinkOfANameRn(categorytab, uid,"Choose a category"), newtitle, price, quantity, description, lid);
+            Console.WriteLine(sql);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
@@ -75,8 +85,6 @@ namespace ConsoleShop100percentLegitNoScam.Program
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
-            Console.Write("Search:");
-            string search = Console.ReadLine();
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
@@ -99,7 +107,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         id.Add(userId);
                     }
                 }
-                string sql2 = string.Format("delete from listings where andid = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid)]);
+                string sql2 = string.Format("delete from listings where andid = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Your listings")]);
                 SqlCommand delListing;
                 SqlDataAdapter adapter = new SqlDataAdapter();
                 delListing = new SqlCommand(sql2, conn);
@@ -149,12 +157,12 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 }
                 Console.WriteLine();
-                Console.WriteLine("click enter to Edit, Delete or Leave");
+                Console.WriteLine("Click enter to open action menu");
                 Console.ReadLine();
 
 
                 string[] y = { "Delete", "Edit", "Main menu" };
-                switch (Other.cantThinkOfANameRn(y, id))
+                switch (Other.cantThinkOfANameRn(y, id,"Listing actions"))
                 {
                     case 0:
                         delListing(id);
@@ -210,14 +218,14 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             SqlCommand addlisting;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("insert into[listings] (title, price, views, user_id, category_id, quantity, description) values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", title, price, 0, userid, Other.cantThinkOfANameRn(categorytab, userid) + 1, quantity, description);
+            string sql = string.Format("insert into[listings] (title, price, views, user_id, category_id, quantity, description) values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", title, price, 0, userid, Other.cantThinkOfANameRn(categorytab, userid, "Choose category") + 1, quantity, description);
             addlisting = new SqlCommand(sql, conn);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
             conn.Close();
         }
 
-        public static void dLD(int lid, int uid)
+        public static void dLD(int lid, int uid, bool loggedin)
         {//dLD - display Listing Data
             while (true) 
             {
@@ -230,13 +238,13 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 SqlCommand searchcomm = new SqlCommand();
                 searchcomm.Connection = conn;
                 searchcomm.CommandText = string.Format("SELECT[user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id], [reviews].[content] FROM[user] INNER JOIN[listings] ON[user].[id] = [listings].[user_id] LEFT JOIN[reviews] ON[reviews].[listing_id] = [listings].[id] WHERE[listings].[id] = '{0}'", lid);
-
+                double price = 0;
 
                 //liczba kolumn
                 SqlDataReader reader2 = searchcomm.ExecuteReader();
 
 
-                string[] authordetails = { "Check author profile", "Post a review", "Main menu" };
+                string[] authordetails = { "Check author profile", "Post a review","Add to cart","Order now", "Main menu" };
 
                 if (reader2.HasRows)
                 {
@@ -245,6 +253,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         Console.Clear();
                         Console.WriteLine(reader2[3]);
                         Console.WriteLine(reader2[2] + "zł");
+                        price = (double)reader2[2];
                         Console.WriteLine();
                         Console.WriteLine(reader2[0] + " " + reader2[1]);
                         Console.WriteLine("Phone number: " + reader2[5]);
@@ -293,18 +302,29 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 Console.WriteLine("Click enter to see author profile or return to main menu");
                 Console.ReadLine();
-
-                switch (Other.cantThinkOfANameRn(authordetails, uid))
+                SqlDataReader reader3 = searchcomm.ExecuteReader();
+                reader3.Read();
+                int iud = (int)reader3[6];
+                switch (Other.cantThinkOfANameRn(authordetails, uid, "Listing actions"))
                 {
                     case 0:
-                        reader2 = searchcomm.ExecuteReader();
-                        User.dUD((int)reader2[6], uid);
+                        User.dUD(iud, uid, loggedin);
                         reader2.Close();
                         break;
                     case 1:
-                        AddReview(uid, lid);
+                        AddReview(uid, lid,loggedin);
                         break;
                     case 2:
+                        //add to cart
+                        if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); break; }
+                        addtocart(uid,lid);
+                        break;
+                    case 3:
+                        //order now
+                        if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); break; }
+                        order(uid, lid,price);
+                        break;
+                    case 4:
                         return;
                 }
 
@@ -314,11 +334,45 @@ namespace ConsoleShop100percentLegitNoScam.Program
             
 
         }
-        public static void AddReview(int reviewerId, int revieweeId)
+        public static void addtocart(int uid, int lid)
+        {
+            Console.Write("Quantity:");
+            string quantity = Console.ReadLine();
+            DateTime currentDateTime = DateTime.Now.Date; // Use Date property to remove the time component
+
+            string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            string query = string.Format("insert into [cart] (user_id, listing_id, quantity, date_added) values ({0},{1},{2},'{3}')", uid, lid, quantity, currentDateTime.ToString("yyyy-MM-dd"));
+
+
+            SqlCommand insertcartCommand = new SqlCommand(query, conn);
+            insertcartCommand.ExecuteNonQuery();
+        }
+        public static void order(int uid, int lid, double priceW)
+        {
+            string price = priceW.ToString("0.00", CultureInfo.InvariantCulture);
+            Console.Write("Quantity:");
+            string quantity = Console.ReadLine();
+            DateTime currentDateTime = DateTime.Now.Date; // Use Date property to remove the time component
+
+            string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered) VALUES ('{0}','{1}','{2}','{3}','{4}')", uid, lid, quantity, price, currentDateTime.ToString("yyyy-MM-dd"));
+            Console.WriteLine(query);
+            SqlCommand insertcartCommand = new SqlCommand(query, conn);
+            insertcartCommand.ExecuteNonQuery();
+
+
+        }
+        public static void AddReview(int reviewerId, int revieweeId, bool loggedin)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
-
+            if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); return; }
             Console.WriteLine("Enter the review content:");
             string reviewContent = Console.ReadLine();
 
