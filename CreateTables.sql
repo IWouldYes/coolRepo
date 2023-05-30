@@ -70,6 +70,7 @@ CREATE TABLE [order_history](
 [quantity] int NOT NULL,
 [price] float NOT NULL,
 [date_ordered] date NOT NULL
+[confirmed] bool NOT NULL
 );
 
 CREATE TABLE [cart](

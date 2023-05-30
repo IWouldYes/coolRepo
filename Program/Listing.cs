@@ -1,3 +1,4 @@
+using ConsoleShop100percentLegitNoScam.Program;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -5,9 +6,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
+using System.Xml.Linq;
 
 namespace ConsoleShop100percentLegitNoScam.Program
 {
@@ -79,6 +84,145 @@ namespace ConsoleShop100percentLegitNoScam.Program
             conn.Close();
         }
 
+        public static void Sales(int uid)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string selectQuery = string.Format("SELECT oh.id, oh.user_id, u.first_name, u.last_name, l.title, oh.quantity, oh.price, oh.date_ordered FROM order_history oh JOIN [user] u ON oh.user_id = u.id JOIN listings l ON oh.listing_id = l.id WHERE oh.confirmed = 0 and oh.user_id = {0}", uid);
+
+                SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
+                SqlDataReader reader = selectCommand.ExecuteReader();
+
+                List<string> name = new List<string>();
+                List<int> id = new List<int>();
+
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        string fullName = reader[5] + "\n" + reader[7]+"zł\n"+ reader[1] +"  " + reader[2]+"\nx"+reader[6]+"\nordered on:"+reader[8];
+                        int userId = (int)reader[0];
+                        name.Add(fullName);
+                        id.Add(userId);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No awaiting orders found.");
+                }
+                name.Add("Back");
+                reader.Close();
+                int oid = -1;
+                while (oid != name.Count - 1)
+                {
+                    oid = Other.cantThinkOfANameRn(name.ToArray(), uid, "Sales");
+
+                    if (oid >= 0 && oid < name.Count - 1)
+                    {
+                        if (name[oid] == "Back")
+                        {
+                            break; // Break the loop if "Back" option is selected
+                        }
+
+                        string updateQuery = string.Format("UPDATE order_history SET confirmed = 1 WHERE id = {0}", id[oid]);
+                        SqlCommand updateCommand = new SqlCommand(updateQuery, conn);
+                        updateCommand.ExecuteNonQuery();
+
+                        Console.WriteLine("Order confirmed successfully.");
+                    }
+                }
+
+
+            }
+        }
+
+        public static void cart(int uid, bool loggedin)
+        {
+            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string selectQuery = string.Format("SELECT cart.id, listings.title, listings.price, cart.quantity, SUM(listings.price * cart.quantity) AS TotalPrice, listings.id AS listings_id FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.id, listings.id, listings.title, listings.price, cart.quantity; SELECT SUM(subquery.TotalPrice) AS CartTotal FROM( SELECT SUM(listings.price * cart.quantity) AS TotalPrice FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.user_id) AS subquery;", uid);
+
+                using (SqlCommand selectCommand = new SqlCommand(selectQuery, conn))
+                {
+                    using (SqlDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        double totalprice = 0;
+                        string stryng;
+                        int lid=0;
+                        List<string> name = new List<string>(); // Declare the 'name' list outside the while loop
+                        List<int> id = new List<int>(); // Declare the 'id' list outside the while loop
+
+                        while (reader.Read())
+                        {
+                            lid = (int)reader["listings_id"];
+
+                            string fullName = reader["title"] + "x" + reader["quantity"] + "\n" + reader["TotalPrice"] + "zł";
+                            int cartId = (int)reader["id"];
+                            name.Add(fullName);
+                            id.Add(cartId);
+                        }
+
+                        if (name.Count > 0) // Check if the 'name' list is not empty
+                        {
+                            reader.NextResult();
+
+                            while (reader.Read())
+                            {
+                                totalprice = (double)reader["CartTotal"];
+                            }
+                            stryng = "Total price:" + totalprice;
+
+                            name.Add("Back");
+
+                            int cid = Other.cantThinkOfANameRn(name.ToArray(), uid, stryng);
+                            if (cid == name.Count - 1)
+                                return;
+
+                            string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Back" };
+                            int selectedAction = Other.cantThinkOfANameRn(cartoptions, uid, "Action menu");
+
+                            switch (selectedAction)
+                            {
+                                case 0:
+                                    dLD(id[lid], uid, loggedin);
+                                    break;
+                                case 1:
+                                    string deleteQuery = string.Format("DELETE FROM cart WHERE id = '{0}'", id[cid]);
+                                    using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, conn))
+                                    {
+                                        deleteCommand.ExecuteNonQuery();
+                                    }
+                                    break;
+                                case 2:
+                                    Console.Write("Quantity:");
+                                    string quantity = Console.ReadLine();
+                                    string updateCartQuery = string.Format("UPDATE cart SET quantity={1} WHERE id = {0}", id[cid], quantity);
+                                    using (SqlCommand updateCartCommand = new SqlCommand(updateCartQuery, conn))
+                                    {
+                                        updateCartCommand.ExecuteNonQuery();
+                                    }
+                                    break;
+                                case 3:
+                                    return;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("No items in the cart.");
+                        }
+                    }
+                }
+            }
+
+
+        }
+
         public static void delListing(int uid)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
@@ -107,7 +251,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         id.Add(userId);
                     }
                 }
-                string sql2 = string.Format("delete from listings where andid = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Your listings")]);
+                string sql2 = string.Format("delete from listings where id = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Your listings")]);
                 SqlCommand delListing;
                 SqlDataAdapter adapter = new SqlDataAdapter();
                 delListing = new SqlCommand(sql2, conn);
@@ -237,7 +381,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 SqlCommand searchcomm = new SqlCommand();
                 searchcomm.Connection = conn;
-                searchcomm.CommandText = string.Format("SELECT[user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id], [reviews].[content] FROM[user] INNER JOIN[listings] ON[user].[id] = [listings].[user_id] LEFT JOIN[reviews] ON[reviews].[listing_id] = [listings].[id] WHERE[listings].[id] = '{0}'", lid);
+                searchcomm.CommandText = string.Format("SELECT[user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id], [reviews].[content], listings.quantity FROM[user] INNER JOIN[listings] ON[user].[id] = [listings].[user_id] LEFT JOIN[reviews] ON[reviews].[listing_id] = [listings].[id] WHERE[listings].[id] = '{0}'", lid);
                 double price = 0;
 
                 //liczba kolumn
@@ -253,6 +397,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         Console.Clear();
                         Console.WriteLine(reader2[3]);
                         Console.WriteLine(reader2[2] + "zł");
+                        Console.WriteLine(reader2[8] + "in stock");
                         price = (double)reader2[2];
                         Console.WriteLine();
                         Console.WriteLine(reader2[0] + " " + reader2[1]);
@@ -268,7 +413,12 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     };
                 }
                 else
+                {
+                    Console.WriteLine(searchcomm.CommandText);
                     Console.WriteLine("No results");
+                }
+
+
 
 
                 SqlCommand searchReviewCommand = new SqlCommand();
@@ -334,40 +484,82 @@ namespace ConsoleShop100percentLegitNoScam.Program
             
 
         }
+
         public static void addtocart(int uid, int lid)
         {
             Console.Write("Quantity:");
-            string quantity = Console.ReadLine();
-            DateTime currentDateTime = DateTime.Now.Date; // Use Date property to remove the time component
+            string quantityStr = Console.ReadLine();
+            if (!int.TryParse(quantityStr, out int quantity))
+            {
+                Console.WriteLine("Invalid quantity. Please enter a valid number.");
+                return;
+            }
 
+            // Retrieve the available quantity from the database
             string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
 
-            string query = string.Format("insert into [cart] (user_id, listing_id, quantity, date_added) values ({0},{1},{2},'{3}')", uid, lid, quantity, currentDateTime.ToString("yyyy-MM-dd"));
+                string availableQuantityQuery = string.Format("SELECT quantity FROM listings WHERE id = {0}", lid);
+                SqlCommand availableQuantityCommand = new SqlCommand(availableQuantityQuery, conn);
+                int availableQuantity = (int)availableQuantityCommand.ExecuteScalar();
 
+                if (quantity > availableQuantity)
+                {
+                    Console.WriteLine("Quantity exceeds available stock. Please enter a lower quantity.");
+                    return;
+                }
 
-            SqlCommand insertcartCommand = new SqlCommand(query, conn);
-            insertcartCommand.ExecuteNonQuery();
+                DateTime currentDateTime = DateTime.Now.Date; // Use Date property to remove the time component
+
+                string query = string.Format("INSERT INTO [cart] (user_id, listing_id, quantity, date_added) VALUES ({0}, {1}, {2}, '{3}')", uid, lid, quantity, currentDateTime.ToString("yyyy-MM-dd"));
+
+                SqlCommand insertcartCommand = new SqlCommand(query, conn);
+                insertcartCommand.ExecuteNonQuery();
+                Console.WriteLine("Item added to cart successfully.");
+            }
         }
+
         public static void order(int uid, int lid, double priceW)
         {
-            string price = priceW.ToString("0.00", CultureInfo.InvariantCulture);
             Console.Write("Quantity:");
-            string quantity = Console.ReadLine();
-            DateTime currentDateTime = DateTime.Now.Date; // Use Date property to remove the time component
+            string quantityStr = Console.ReadLine();
+            if (!int.TryParse(quantityStr, out int quantity))
+            {
+                Console.WriteLine("Invalid quantity. Please enter a valid number.");
+                return;
+            }
 
+            // Retrieve the available quantity from the database
             string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
 
-            string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered) VALUES ('{0}','{1}','{2}','{3}','{4}')", uid, lid, quantity, price, currentDateTime.ToString("yyyy-MM-dd"));
-            Console.WriteLine(query);
-            SqlCommand insertcartCommand = new SqlCommand(query, conn);
-            insertcartCommand.ExecuteNonQuery();
+                string availableQuantityQuery = string.Format("SELECT quantity FROM listings WHERE id = {0}", lid);
+                SqlCommand availableQuantityCommand = new SqlCommand(availableQuantityQuery, conn);
+                int availableQuantity = (int)availableQuantityCommand.ExecuteScalar();
 
+                if (quantity > availableQuantity)
+                {
+                    Console.WriteLine("Quantity exceeds available stock. Please enter a lower quantity.");
+                    return;
+                }
 
+                string price = priceW.ToString("0.00", CultureInfo.InvariantCulture);
+                DateTime currentDateTime = DateTime.Now; // Get the current date and time
+
+                string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered, confirmed) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{0}')", uid, lid, quantity, price, currentDateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                SqlCommand insertcartCommand = new SqlCommand(query, conn);
+                insertcartCommand.ExecuteNonQuery();
+                Console.WriteLine("Order placed successfully.");
+                Thread.Sleep(1000);
+            }
         }
+
+
         public static void AddReview(int reviewerId, int revieweeId, bool loggedin)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");

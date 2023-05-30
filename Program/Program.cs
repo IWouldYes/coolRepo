@@ -1,5 +1,7 @@
 
 
+using System.Reflection.Metadata.Ecma335;
+
 namespace ConsoleShop100percentLegitNoScam.Program
 {
     internal class Program
@@ -68,6 +70,9 @@ namespace ConsoleShop100percentLegitNoScam.Program
                             case 2:
                                 break;
                             case 3:
+                                Listing.cart(userid, isLoggedIn);
+                                break;
+                            case 4:
                                 break;
                         }
                         break;
@@ -82,6 +87,9 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                                 case 1:
                                     Listing.addListing(userid);
+                                    break;
+                                case 2:
+                                    Listing.Sales(userid);
                                     break;
 
                             }

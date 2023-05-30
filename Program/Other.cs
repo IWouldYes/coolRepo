@@ -54,7 +54,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             {
                 Console.Clear();
                 int spcnum = 0;
-                Console.WriteLine(startcontent);Console.WriteLine("-------------------------");Console.WriteLine();
+                Console.WriteLine(startcontent);Console.WriteLine("-------------------------");
 
                 for (int i = 0; i < text.Length; i++)
                 {
@@ -78,8 +78,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 Console.WriteLine("――――――――――――――――――――――――――――――――");
                 Console.WriteLine("use up and down arrows to choose");
-                Console.WriteLine();
-                selectName(uid);
+                Console.WriteLine(selectName(uid));
 
 
 

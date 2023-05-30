@@ -32,6 +32,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             if (count > 0)
             {
                 Console.WriteLine("Login already exists in the database.");
+                return 0;
             }
             else
             {
