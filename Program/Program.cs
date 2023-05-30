@@ -8,7 +8,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         {
             bool isLoggedIn = false;
             int userid = 0;
-            string[] myAcc = new string[] { "Login", "Register new account", "Edit account", "Back" };
+            string[] myAcc = new string[] { "Login", "Register new account", "Edit account","My cart","Back" };
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat" };
             string[] meinListings = new string[] { "edit/delete listing", "Create listing", "Back" };
 
