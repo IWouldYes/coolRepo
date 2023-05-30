@@ -50,7 +50,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 Console.WriteLine("――――――Click enter to open action menu or leave―――――――");
                 Console.ReadLine();
 
-                switch (Other.cantThinkOfANameRn(writemessageui, sendid))
+                switch (Other.cantThinkOfANameRn(writemessageui, sendid,"Chat"))
                 {
                     case 2:
                         isnotesc = false;
@@ -162,7 +162,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             name.Add("Back");
             id.Add(0);
 
-            showChat(id[Other.cantThinkOfANameRn(name.ToArray(), uid)], uid);
+            showChat(id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Your chats")], uid);
             conn.Close();
         }
     }

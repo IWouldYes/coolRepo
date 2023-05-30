@@ -23,7 +23,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             }
         }
 
-        public static void searchListing(int uid)
+        public static void searchListing(int uid, bool loggedin)
         {
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -53,7 +53,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         id.Add(userId);
                     }
                 }
-                Listing.dLD(id[Other.cantThinkOfANameRn(name.ToArray(), uid)], uid);
+                Listing.dLD(id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Search:"+search)], uid, loggedin);
                 conn.Close();
             }
             else
@@ -64,7 +64,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         }
 
-        public static void searchUser(int uid)
+        public static void searchUser(int uid, bool loggedin)
         {
             Console.Write("Search:");
             string search = Console.ReadLine();
@@ -99,12 +99,11 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 }
             }
 
-            User.dUD(id[Other.cantThinkOfANameRn(name.ToArray(), uid)], uid);
+            User.dUD(id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Search:"+search)], uid);
             conn.Close();
 
         }
-
-        public static void mainsearch(int uid, string search)
+        public static void mainsearch(int uid, string search, bool loggedin)
         {
 
             string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
@@ -135,7 +134,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         id.Add(userId);
                     }
                 }
-                Listing.dLD(id[Other.cantThinkOfANameRn(name.ToArray(), uid)], uid);
+                Listing.dLD(id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Search:"+search)], uid,loggedin);
                 conn.Close();
             }
             else
@@ -146,7 +145,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         }
 
-        public static void Filters(int uid)
+        public static void Filters(int uid,bool loggedin)
         {
             string[] categorytab = new string[] {
         "toys",
@@ -172,7 +171,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             maxprice = Other.lenght(4, 0, maxprice, "maximum price", true);
             string maxPriceCondition = ifnulthen(maxprice, "Price <= ", false);
 
-            int categoryid = Other.cantThinkOfANameRn(categorytab, uid);
+            int categoryid = Other.cantThinkOfANameRn(categorytab, uid,"Choose a category");
             string catq = "";
             if (categoryid != 9)
                 catq = ifnulthen(categoryid.ToString(), "category_id = ", false);
@@ -209,7 +208,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             sqlQuery.Append(string.Join(" AND ", conditions));
 
             Console.WriteLine(sqlQuery.ToString());
-            mainsearch(uid, sqlQuery.ToString());
+            mainsearch(uid, sqlQuery.ToString(), loggedin);
         }
 
 

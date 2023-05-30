@@ -308,7 +308,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 switch (Other.cantThinkOfANameRn(authordetails, uid, "Listing actions"))
                 {
                     case 0:
-                        User.dUD(iud, uid, loggedin);
+                        User.dUD(iud, uid);
                         reader2.Close();
                         break;
                     case 1:

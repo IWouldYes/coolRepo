@@ -164,7 +164,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 SqlDataReader userReader = searchUserCommand.ExecuteReader();
 
                 string[] authorActions = { "Message author", "Comment", "Main menu" };
-
+                string name;
                 if (userReader.HasRows)
                 {
                     while (userReader.Read())
@@ -219,7 +219,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 Console.Write("\nPress Enter to open the action menu");
                 Console.ReadLine();
 
-                switch (Other.cantThinkOfANameRn(authorActions, muid))
+                switch (Other.cantThinkOfANameRn(authorActions, muid,""))
                 {
                     case 0:
                         // Message author

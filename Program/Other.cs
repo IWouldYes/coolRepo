@@ -9,7 +9,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 {
     public class Other
     {
-        public static void selectName(int userid)
+        public static string selectName(int userid)
         {
             SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
             conn.Open();
@@ -34,15 +34,13 @@ namespace ConsoleShop100percentLegitNoScam.Program
             {
                 while (reader2.Read())
                 {
-                    Console.Write("Logged in as ");
-                    Console.Write(reader2[0]);
-                    Console.Write(" ");
-                    Console.WriteLine(reader2[1]);
+                    return reader2[0] + " " + reader2[1];
 
                 }
+                return "nigger";
             }
             else
-                Console.WriteLine("Not logged in");
+                return "Not logged in";
             conn.Close();
 
         }
@@ -102,8 +100,6 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         case ConsoleKey.Enter:
                             Console.Clear();
                             return pos;
-                            Console.Clear();
-                            break;
                     }
             }
         }
