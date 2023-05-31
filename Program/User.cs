@@ -12,7 +12,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
     {
         public static int register()
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
             string login, fName, lName, password, phoneNumber, description, country, city, street;
@@ -97,7 +97,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             Console.Write("Password:");
             password = Console.ReadLine();
 
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
             conn.Open();
 
@@ -135,7 +135,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         Console.WriteLine(reader2[i]);
                         id = (int)reader2[0];
                     }
-                    Console.WriteLine();
+                    Console.WriteLine(Other.selectName(id));
 
                 }
             }
@@ -152,7 +152,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         {
             while (true)
             {
-                string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+                string connectionString = @Program.connectionString;
                 SqlConnection conn = new SqlConnection(connectionString);
 
                 conn.Open();
@@ -241,7 +241,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void AddComment(int CommenterId, int CommenteeId)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
             Console.WriteLine("Enter the comment content:");

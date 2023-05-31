@@ -25,7 +25,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void searchListing(int uid, bool loggedin)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -71,7 +71,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
 
 
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -106,7 +106,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static void mainsearch(int uid, string search, bool loggedin)
         {
 
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();

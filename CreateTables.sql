@@ -69,8 +69,8 @@ CREATE TABLE [order_history](
 [listing_id] int NOT NULL CONSTRAINT FK_order_history_listing_id REFERENCES [listings](id) ON DELETE NO ACTION,
 [quantity] int NOT NULL,
 [price] float NOT NULL,
-[date_ordered] date NOT NULL
-[confirmed] bool NOT NULL
+[date_ordered] date NOT NULL,
+[confirmed] bit NOT NULL
 );
 
 CREATE TABLE [cart](

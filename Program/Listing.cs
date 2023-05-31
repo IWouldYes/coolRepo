@@ -1,4 +1,5 @@
 using ConsoleShop100percentLegitNoScam.Program;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -18,9 +19,9 @@ namespace ConsoleShop100percentLegitNoScam.Program
 {
     public class Listing
     {
-        public static void editListing(int uid)
+        public static int czos(int uid)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -49,8 +50,14 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 }
             }
             reader2.Close();
+
+            return id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Your listings")];
+        }
+        public static void editListing(int uid)
+        {
+            int lid = czos(uid);
+            SqlConnection conn = new SqlConnection();
             string price, quantity, newtitle, description;
-            int lid = id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Your listings")];
             Console.Write("New title:");
             newtitle = Console.ReadLine();
             newtitle = Other.lenght(50, 2, newtitle, "New title", false);
@@ -86,146 +93,183 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void Sales(int uid)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            string connectionString = @Program.connectionString;
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            string selectQuery = string.Format("SELECT oh.id, oh.user_id, u.first_name, u.last_name, l.title, oh.quantity, oh.price, oh.date_ordered, l.id AS listing_id FROM order_history oh JOIN [user] u ON oh.user_id = u.id JOIN listings l ON oh.listing_id = l.id WHERE oh.confirmed = 0 and oh.user_id = {0}", uid);
+
+            SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
+            SqlDataReader reader = selectCommand.ExecuteReader();
+
+            List<string> name = new List<string>();
+            List<int> id = new List<int>();
+            List<int> listingIds = new List<int>();
+
+            if (reader.HasRows)
             {
-                conn.Open();
-
-                string selectQuery = string.Format("SELECT oh.id, oh.user_id, u.first_name, u.last_name, l.title, oh.quantity, oh.price, oh.date_ordered FROM order_history oh JOIN [user] u ON oh.user_id = u.id JOIN listings l ON oh.listing_id = l.id WHERE oh.confirmed = 0 and oh.user_id = {0}", uid);
-
-                SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
-                SqlDataReader reader = selectCommand.ExecuteReader();
-
-                List<string> name = new List<string>();
-                List<int> id = new List<int>();
-
-                if (reader.HasRows)
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        string fullName = reader[5] + "\n" + reader[7]+"zł\n"+ reader[1] +"  " + reader[2]+"\nx"+reader[6]+"\nordered on:"+reader[8];
-                        int userId = (int)reader[0];
-                        name.Add(fullName);
-                        id.Add(userId);
-                    }
+                    string fullName = reader["title"] + "\n" + reader["price"] + "zł\n" + reader["first_name"] + " " + reader["last_name"] + "\nx" + reader["quantity"]+"\n";
+                    int orderId = (int)reader["id"];
+                    int listingId = (int)reader["listing_id"];
+                    name.Add(fullName);
+                    id.Add(orderId);
+                    listingIds.Add(listingId);
                 }
-                else
-                {
-                    Console.WriteLine("No awaiting orders found.");
-                }
-                name.Add("Back");
-                reader.Close();
-                int oid = -1;
-                while (oid != name.Count - 1)
-                {
-                    oid = Other.cantThinkOfANameRn(name.ToArray(), uid, "Sales");
-
-                    if (oid >= 0 && oid < name.Count - 1)
-                    {
-                        if (name[oid] == "Back")
-                        {
-                            break; // Break the loop if "Back" option is selected
-                        }
-
-                        string updateQuery = string.Format("UPDATE order_history SET confirmed = 1 WHERE id = {0}", id[oid]);
-                        SqlCommand updateCommand = new SqlCommand(updateQuery, conn);
-                        updateCommand.ExecuteNonQuery();
-
-                        Console.WriteLine("Order confirmed successfully.");
-                    }
-                }
-
-
             }
+            else
+            {
+                Console.WriteLine("No awaiting orders found.");
+            }
+            reader.Close();
+
+            name.Add("Back");
+            int oid = -1;
+            while (oid != name.Count - 1)
+            {
+                oid = Other.cantThinkOfANameRn(name.ToArray(), uid, "Sales");
+
+                if (oid >= 0 && oid < name.Count - 1)
+                {
+                    if (name[oid] == "Back")
+                    {
+                        break; // Break the loop if "Back" option is selected
+                    }
+
+                    string updateQuery = string.Format("UPDATE order_history SET confirmed = 1 WHERE id = {0}", id[oid]);
+                    SqlCommand updateCommand = new SqlCommand(updateQuery, conn);
+
+
+
+                    Console.WriteLine(); // Add an empty line for spacing
+
+                    string[] actionMenuOptions = { "View user details", "Confirm order", "View listing details", "Back" };
+                    int selectedAction = Other.cantThinkOfANameRn(actionMenuOptions, uid, "Action Menu");
+
+                    switch (selectedAction)
+                    {
+                        case 0:
+                            int userId = (int)reader["user_id"];
+                            User.dUD(userId, uid);
+                            break;
+                        case 1:
+                            updateCommand.ExecuteNonQuery();
+                            Console.WriteLine("Order confirmed successfully.");
+                            Thread.Sleep(1000);
+
+                            break;
+                        case 2:
+                            int listingId = listingIds[oid];
+                            dLD(listingId, uid, false);
+                            break;
+                        case 3:
+                            // Go back to the previous menu
+                            break;
+                    }
+                }
+            }
+
+            conn.Close();
         }
+
+
+
 
         public static void cart(int uid, bool loggedin)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            string selectQuery = string.Format("SELECT cart.id, cart.listing_id, listings.title, listings.price, cart.quantity, SUM(listings.price * cart.quantity) AS TotalPrice, listings.id AS listings_id FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.id, cart.listing_id, listings.id, listings.title, listings.price, cart.quantity; SELECT SUM(subquery.TotalPrice) AS CartTotal FROM( SELECT SUM(listings.price * cart.quantity) AS TotalPrice FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.user_id) AS subquery;", uid);
+
+            SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
+            SqlDataReader reader = selectCommand.ExecuteReader();
+
+            double totalprice = 0;
+            string stryng;
+            int lid = 0;
+            List<string> name = new List<string>(); // Declare the 'name' list outside the while loop
+            List<int> id = new List<int>(); // Declare the 'id' list outside the while loop
+
+            while (reader.Read())
             {
-                conn.Open();
-                string selectQuery = string.Format("SELECT cart.id, listings.title, listings.price, cart.quantity, SUM(listings.price * cart.quantity) AS TotalPrice, listings.id AS listings_id FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.id, listings.id, listings.title, listings.price, cart.quantity; SELECT SUM(subquery.TotalPrice) AS CartTotal FROM( SELECT SUM(listings.price * cart.quantity) AS TotalPrice FROM cart JOIN listings ON cart.listing_id = listings.id WHERE cart.user_id = {0} GROUP BY cart.user_id) AS subquery;", uid);
+                lid = (int)reader["listings_id"];
+                Console.WriteLine(lid);
+                Console.Read();
 
-                using (SqlCommand selectCommand = new SqlCommand(selectQuery, conn))
-                {
-                    using (SqlDataReader reader = selectCommand.ExecuteReader())
-                    {
-                        double totalprice = 0;
-                        string stryng;
-                        int lid=0;
-                        List<string> name = new List<string>(); // Declare the 'name' list outside the while loop
-                        List<int> id = new List<int>(); // Declare the 'id' list outside the while loop
-
-                        while (reader.Read())
-                        {
-                            lid = (int)reader["listings_id"];
-
-                            string fullName = reader["title"] + "x" + reader["quantity"] + "\n" + reader["TotalPrice"] + "zł";
-                            int cartId = (int)reader["id"];
-                            name.Add(fullName);
-                            id.Add(cartId);
-                        }
-
-                        if (name.Count > 0) // Check if the 'name' list is not empty
-                        {
-                            reader.NextResult();
-
-                            while (reader.Read())
-                            {
-                                totalprice = (double)reader["CartTotal"];
-                            }
-                            stryng = "Total price:" + totalprice;
-
-                            name.Add("Back");
-
-                            int cid = Other.cantThinkOfANameRn(name.ToArray(), uid, stryng);
-                            if (cid == name.Count - 1)
-                                return;
-
-                            string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Back" };
-                            int selectedAction = Other.cantThinkOfANameRn(cartoptions, uid, "Action menu");
-
-                            switch (selectedAction)
-                            {
-                                case 0:
-                                    dLD(id[lid], uid, loggedin);
-                                    break;
-                                case 1:
-                                    string deleteQuery = string.Format("DELETE FROM cart WHERE id = '{0}'", id[cid]);
-                                    using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, conn))
-                                    {
-                                        deleteCommand.ExecuteNonQuery();
-                                    }
-                                    break;
-                                case 2:
-                                    Console.Write("Quantity:");
-                                    string quantity = Console.ReadLine();
-                                    string updateCartQuery = string.Format("UPDATE cart SET quantity={1} WHERE id = {0}", id[cid], quantity);
-                                    using (SqlCommand updateCartCommand = new SqlCommand(updateCartQuery, conn))
-                                    {
-                                        updateCartCommand.ExecuteNonQuery();
-                                    }
-                                    break;
-                                case 3:
-                                    return;
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("No items in the cart.");
-                        }
-                    }
-                }
+                string fullName = reader["title"] + "x" + reader["quantity"] + "\n" + reader["TotalPrice"] + "zł\n";
+                int cartId = (int)reader["id"];
+                name.Add(fullName);
+                id.Add(cartId);
             }
 
+            if (name.Count > 0) // Check if the 'name' list is not empty
+            {
+                reader.NextResult();
 
+                while (reader.Read())
+                {
+                    totalprice = (double)reader["CartTotal"];
+                }
+                stryng = "Total price:" + totalprice;
+
+                name.Add("Back");
+
+                int cid = Other.cantThinkOfANameRn(name.ToArray(), uid, stryng);
+                if (cid == name.Count - 1)
+                {
+                    conn.Close();
+                    return;
+                }
+
+                string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Back" };
+                int selectedAction = Other.cantThinkOfANameRn(cartoptions, uid, "Action menu");
+                reader.Close();
+                switch (selectedAction)
+                {
+                    case 0:
+                        if (cid >= 0 && cid < id.Count)
+                        {
+                            int cartId = id[cid];
+                            string listingIdQuery = string.Format("SELECT listing_id FROM cart WHERE id = {0}", cartId);
+                            SqlCommand listingIdCommand = new SqlCommand(listingIdQuery, conn);
+                            int listingId = (int)listingIdCommand.ExecuteScalar();
+                            conn.Close();
+                            dLD(listingId, uid, loggedin);
+                        }
+                        break;
+                    case 1:
+                        string deleteQuery = string.Format("DELETE FROM cart WHERE id = '{0}'", id[cid]);
+                        SqlCommand deleteCommand = new SqlCommand(deleteQuery, conn);
+                        deleteCommand.ExecuteNonQuery();
+                        conn.Close();
+                        break;
+                    case 2:
+                        Console.Write("Quantity:");
+                        string quantity = Console.ReadLine();
+                        string updateCartQuery = string.Format("UPDATE cart SET quantity={1} WHERE id = {0}", id[cid], quantity);
+                        SqlCommand updateCartCommand = new SqlCommand(updateCartQuery, conn);
+                        updateCartCommand.ExecuteNonQuery();
+                        conn.Close();
+                        break;
+                    case 3:
+                        conn.Close();
+                        return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("No items in the cart.");
+                conn.Close();
+            }
         }
+
 
         public static void delListing(int uid)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -271,48 +315,70 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         }
 
-        public static void myListings(int id)
+        public static void myListings(int uid)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
+            SqlCommand searchComm = new SqlCommand();
+            searchComm.Connection = conn;
+            searchComm.CommandText = string.Format("SELECT title, price, views FROM [listings] WHERE user_id = '{0}'", uid);
 
-
-            SqlCommand searchcomm = new SqlCommand();
-            searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("select title, price, views from [listings] where user_id = '{0}'", id);
-
-
-            //liczba kolumn
-            SqlDataReader reader2 = searchcomm.ExecuteReader();
+            SqlDataReader reader = searchComm.ExecuteReader();
             Console.WriteLine("Your listings:");
             Console.WriteLine();
-            if (reader2.HasRows)
+            if (reader.HasRows)
             {
-                while (reader2.Read())
+                while (reader.Read())
                 {
-                    Console.Write("title:");
-                    Console.WriteLine(reader2[0]);
-                    Console.Write("price:");
-                    Console.WriteLine(reader2[1]);
-                    Console.Write("views:");
-                    Console.WriteLine(reader2[2]);
-
-
+                    Console.Write("Title: ");
+                    Console.WriteLine(reader[0]);
+                    Console.Write("Price: ");
+                    Console.WriteLine(reader[1]);
+                    Console.Write("Views: ");
+                    Console.WriteLine(reader[2]);
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
-                Console.WriteLine("Click enter to open action menu");
+                Console.WriteLine("Press Enter to open the action menu");
                 Console.ReadLine();
 
+                string[] actionMenuOptions = { "Delete", "Edit", "Main menu" };
+                string[] editMenuOptions = { "Edit info", "Add photo", "Replace photo", "Delete photo" };
 
-                string[] y = { "Delete", "Edit", "Main menu" };
-                switch (Other.cantThinkOfANameRn(y, id,"Listing actions"))
+                int actionChoice = Other.cantThinkOfANameRn(actionMenuOptions, uid, "Listing actions");
+                int lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy;
+                switch (actionChoice)
                 {
                     case 0:
-                        delListing(id);
+                        delListing(uid);
                         break;
                     case 1:
-                        editListing(id);
+                        int editChoice = Other.cantThinkOfANameRn(editMenuOptions, uid, "Listing edition");
+                        switch (editChoice)
+                        {
+                            case 0:
+                                editListing(uid);
+                                break;
+                            case 1:
+                                lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy = czos(uid);
+                                Console.WriteLine("Enter the path of the image you want to add:");
+                                string imagePath = Console.ReadLine();
+                                byte[] imageBytes = PhotoManager.ReadImageBytes(imagePath);
+                                PhotoManager.InsertListingPhoto(lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy, imageBytes);
+                                Console.WriteLine("Photo added successfully.");
+                                break;
+                            case 2:
+                                lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy = czos(uid);
+                                Console.WriteLine("Enter the path of the new image:");
+                                string newImagePath = Console.ReadLine();
+                                PhotoManager.ReplacePhoto(lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy, newImagePath);
+                                break;
+                            case 3:
+                                lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy = czos(uid);
+                                PhotoManager.DeleteListingPhoto(lildadefrnidkjgbuwiesfweshujgrsvyftsdcgyescytad6zrcgfy);
+                                Console.WriteLine("Photo deleted successfully.");
+                                break;
+                        }
                         break;
                     case 2:
                         break;
@@ -321,17 +387,20 @@ namespace ConsoleShop100percentLegitNoScam.Program
             else
             {
                 Console.WriteLine("No results");
-                Console.Write("click enter to return to main menu");
+                Console.Write("Press Enter to return to the main menu");
                 Console.ReadLine();
             }
-            conn.Close();
 
+            conn.Close();
         }
+
+
+
 
         public static void addListing(int userid)
         {
             string price, quantity, title, description;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
             Console.Write("Title:");
@@ -370,25 +439,23 @@ namespace ConsoleShop100percentLegitNoScam.Program
         }
 
         public static void dLD(int lid, int uid, bool loggedin)
-        {//dLD - display Listing Data
-            while (true) 
+        {
+            while (true)
             {
-                string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+                string connectionString = @Program.connectionString;
                 SqlConnection conn = new SqlConnection(connectionString);
 
                 conn.Open();
 
-
                 SqlCommand searchcomm = new SqlCommand();
                 searchcomm.Connection = conn;
-                searchcomm.CommandText = string.Format("SELECT[user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id], [reviews].[content], listings.quantity FROM[user] INNER JOIN[listings] ON[user].[id] = [listings].[user_id] LEFT JOIN[reviews] ON[reviews].[listing_id] = [listings].[id] WHERE[listings].[id] = '{0}'", lid);
+                searchcomm.CommandText = string.Format("SELECT [listings].[id], [user].[first_name], [user].[last_name], [listings].[price], [listings].[title], [listings].[description], [user].[phone_number], [listings].[user_id], [reviews].[content], listings.quantity FROM [user] INNER JOIN [listings] ON [user].[id] = [listings].[user_id] LEFT JOIN [reviews] ON [reviews].[listing_id] = [listings].[id] WHERE [listings].[id] = '{0}'", lid);
                 double price = 0;
 
-                //liczba kolumn
+                // Number of columns
                 SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-
-                string[] authordetails = { "Check author profile", "Post a review","Add to cart","Order now", "Main menu" };
+                string[] authordetails = { "Check author profile", "Post a review", "Show listing photo", "Add to cart", "Order now", "Main menu" };
 
                 if (reader2.HasRows)
                 {
@@ -396,9 +463,16 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     {
                         Console.Clear();
                         Console.WriteLine(reader2[3]);
-                        Console.WriteLine(reader2[2] + "zł");
+                        if (double.TryParse(reader2[3].ToString(), out double parsedPrice))
+                        {
+                            price = parsedPrice;
+                            Console.WriteLine(parsedPrice + "zł");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid price format");
+                        }
                         Console.WriteLine(reader2[8] + "in stock");
-                        price = (double)reader2[2];
                         Console.WriteLine();
                         Console.WriteLine(reader2[0] + " " + reader2[1]);
                         Console.WriteLine("Phone number: " + reader2[5]);
@@ -406,20 +480,14 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         Console.WriteLine(reader2[4]);
                         Other.viewsCounter(lid);
 
-
-
-
-
-                    };
+                        int listingId = (int)reader2["id"];
+                    }
                 }
                 else
                 {
                     Console.WriteLine(searchcomm.CommandText);
                     Console.WriteLine("No results");
                 }
-
-
-
 
                 SqlCommand searchReviewCommand = new SqlCommand();
                 searchReviewCommand.Connection = conn;
@@ -450,7 +518,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 }
                 reviewReader.Close();
 
-                Console.WriteLine("Click enter to see author profile or return to main menu");
+                Console.WriteLine("Click enter to see author profile or return to the main menu");
                 Console.ReadLine();
                 SqlDataReader reader3 = searchcomm.ExecuteReader();
                 reader3.Read();
@@ -462,28 +530,46 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         reader2.Close();
                         break;
                     case 1:
-                        AddReview(uid, lid,loggedin);
+                        AddReview(uid, lid, loggedin);
                         break;
                     case 2:
-                        //add to cart
-                        if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); break; }
-                        addtocart(uid,lid);
+                        //show listing photo
+                        PhotoManager.ShowListingPhoto(lid);
                         break;
                     case 3:
-                        //order now
-                        if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); break; }
-                        order(uid, lid,price);
+                        // Add to cart
+                        if (!loggedin)
+                        {
+                            Console.WriteLine("Please log in first");
+                            Thread.Sleep(1000);
+                            Console.Clear();
+                            break;
+                        }
+                        addtocart(uid, lid);
                         break;
                     case 4:
+                        // Order now
+                        if (!loggedin)
+                        {
+                            Console.WriteLine("Please log in first");
+                            Thread.Sleep(1000);
+                            Console.Clear();
+                            break;
+                        }
+                        order(uid, lid, price);
+                        break;
+                    case 5:
                         return;
                 }
 
-
                 conn.Close();
             }
-            
-
         }
+
+
+
+
+
 
         public static void addtocart(int uid, int lid)
         {
@@ -491,12 +577,13 @@ namespace ConsoleShop100percentLegitNoScam.Program
             string quantityStr = Console.ReadLine();
             if (!int.TryParse(quantityStr, out int quantity))
             {
-                Console.WriteLine("Invalid quantity. Please enter a valid number.");
+                Console.WriteLine("Invalid quantity. Please enter a valid number.\n returning in 1 second");
+                Thread.Sleep(1000);
                 return;
             }
 
             // Retrieve the available quantity from the database
-            string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = Program.connectionString;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -527,12 +614,13 @@ namespace ConsoleShop100percentLegitNoScam.Program
             string quantityStr = Console.ReadLine();
             if (!int.TryParse(quantityStr, out int quantity))
             {
-                Console.WriteLine("Invalid quantity. Please enter a valid number.");
+                Console.WriteLine("Invalid quantity. Please enter a valid number.\n returning in 1 second");
+                Thread.Sleep(1000);
                 return;
             }
 
             // Retrieve the available quantity from the database
-            string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = Program.connectionString;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -550,7 +638,9 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 string price = priceW.ToString("0.00", CultureInfo.InvariantCulture);
                 DateTime currentDateTime = DateTime.Now; // Get the current date and time
 
-                string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered, confirmed) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{0}')", uid, lid, quantity, price, currentDateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered, confirmed) VALUES ('{0}', '{1}', '{2}', '{3}', CONVERT(date, '{4}', 101), '0')", uid, lid, quantity, price, currentDateTime.ToString("MM/dd/yyyy"));
+
+
 
                 SqlCommand insertcartCommand = new SqlCommand(query, conn);
                 insertcartCommand.ExecuteNonQuery();
@@ -562,7 +652,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void AddReview(int reviewerId, int revieweeId, bool loggedin)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
             if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); return; }
             Console.WriteLine("Enter the review content:");

@@ -11,7 +11,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
     {
         public static string selectName(int userid)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
 
@@ -78,8 +78,8 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 Console.WriteLine("――――――――――――――――――――――――――――――――");
                 Console.WriteLine("use up and down arrows to choose");
-                Console.WriteLine(selectName(uid));
-
+                if (uid==0)
+                    Console.WriteLine("Not logged in");
 
 
 
@@ -105,28 +105,45 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static string lenght(int maxLength, int minLength, string variable, string variableName, bool isNumber)
         {
-            while (variable.Length < minLength || variable.Length > maxLength)
+            while (true)
             {
-                if (variable.Length < minLength)
+                if (variable.Length < minLength || variable.Length > maxLength)
                 {
-                    Console.WriteLine($"{variableName} is too short. It must be at least {minLength} characters long. Please try again.");
-                }
-                else if (variable.Length > maxLength)
-                {
-                    Console.WriteLine($"{variableName} is too long. It must be less than or equal to {maxLength} characters long. Please try again.");
+                    if (variable.Length < minLength)
+                    {
+                        Console.WriteLine($"{variableName} is too short. It must be at least {minLength} characters long. Please try again.");
+                    }
+                    else if (variable.Length > maxLength)
+                    {
+                        Console.WriteLine($"{variableName} is too long. It must be less than or equal to {maxLength} characters long. Please try again.");
+                    }
+
+                    Console.Write($"{variableName}: ");
+                    variable = Console.ReadLine();
+                    continue; // Go to the next iteration of the loop
                 }
 
-                Console.Write($"{variableName}: ");
-                variable = Console.ReadLine();
+                if (isNumber)
+                {
+                    if (!int.TryParse(variable, out _))
+                    {
+                        Console.WriteLine("Invalid " + variableName + ". Please enter a valid integer.");
+                        Console.Write($"{variableName}: ");
+                        variable = Console.ReadLine();
+                        continue; // Go to the next iteration of the loop
+                    }
+                }
+
+                break; // Exit the loop if both checks pass
             }
-
 
             return variable;
         }
 
+
         public static void loginfo(int userid)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
 
@@ -165,7 +182,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static int selectId(string password, string loginsql)
         {
             int id = 0;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
 
@@ -200,7 +217,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void viewsCounter(int lid)
         {
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
             SqlCommand searchcomm = new SqlCommand();

@@ -12,7 +12,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static void messageAuthor(int recid, int sendid)
         {
             string message;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
 
             if (sendid != 0)
@@ -40,7 +40,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static void writeChat(int recid, int sendid)
         {
             string message;
-            SqlConnection conn = new SqlConnection("workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application");
+            SqlConnection conn = new SqlConnection(Program.connectionString);
             conn.Open();
             bool isnotesc = true;
             string[] writemessageui = { "Write message", "See chat", "Main menu" };
@@ -82,7 +82,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static void showChat(int recid, int sendid)
         {
             if (recid == 0) return;
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
@@ -132,7 +132,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
         public static void chat(int uid)
         {
-            string connectionString = @"workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
+            string connectionString = @Program.connectionString;
             SqlConnection conn = new SqlConnection(connectionString);
 
             conn.Open();
