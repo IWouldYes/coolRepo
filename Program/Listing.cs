@@ -97,7 +97,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             SqlConnection conn = new SqlConnection(connectionString);
             conn.Open();
 
-            string selectQuery = string.Format("SELECT oh.id, oh.user_id, u.first_name, u.last_name, l.title, oh.quantity, oh.price, oh.date_ordered, l.id AS listing_id FROM order_history oh JOIN [user] u ON oh.user_id = u.id JOIN listings l ON oh.listing_id = l.id WHERE oh.confirmed = 0 and oh.user_id = {0}", uid);
+            string selectQuery = string.Format("SELECT oh.id, oh.user_id, u.first_name, u.last_name, l.title, oh.quantity, oh.price, oh.date_ordered, l.id AS listing_id FROM order_history oh JOIN [user] u ON oh.user_id = u.id JOIN listings l ON oh.listing_id = l.id WHERE oh.confirmed = 0 and l.user_id = {0}", uid);
 
             SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
             SqlDataReader reader = selectCommand.ExecuteReader();
