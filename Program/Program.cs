@@ -9,11 +9,28 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static readonly string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
         private static readonly string FileName = "boolValue.txt";
         private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
+        private static readonly byte EncryptionKey = 0x7F;
 
+        private static byte[] Encrypt(byte[] data)
+        {
+            byte[] encryptedData = new byte[data.Length];
+            for (int i = 0; i < data.Length; i++)
+            {
+                encryptedData[i] = (byte)(data[i] ^ EncryptionKey);
+            }
+            return encryptedData;
+        }
+
+        private static byte[] Decrypt(byte[] encryptedData)
+        {
+            return Encrypt(encryptedData);
+        }
 
         public static void Write(int userId)
         {
-            File.WriteAllText(FilePath, userId.ToString());
+            byte[] encryptedBytes = Encrypt(BitConverter.GetBytes(userId));
+            string encryptedString = Convert.ToBase64String(encryptedBytes);
+            File.WriteAllText(FilePath, encryptedString);
             Console.WriteLine($"User ID written to file: {FilePath}");
         }
 
@@ -21,27 +38,27 @@ namespace ConsoleShop100percentLegitNoScam.Program
         {
             if (File.Exists(FilePath))
             {
-                string content = File.ReadAllText(FilePath);
-                if (int.TryParse(content, out int userId))
-                {
-                    return userId;
-                }
-                else { return 0; }
+                string encryptedString = File.ReadAllText(FilePath);
+                byte[] encryptedBytes = Convert.FromBase64String(encryptedString);
+                byte[] decryptedBytes = Decrypt(encryptedBytes);
+                int userId = BitConverter.ToInt32(decryptedBytes, 0);
+                return userId;
             }
-            else { return 0; }
+            return 0;
         }
 
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) 
+        { 
+
             bool isLoggedIn = false;
             int userid = 0;
-            string[] myAcc = new string[] { "Login", "Register new account", "Edit account","My cart","Back" };
+            string[] myAcc = new string[] { "Login", "Register new account","Log out", "Edit account","My cart","Back" };
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat", "Exit" };
             string[] meinListings = new string[] { "Listing actions", "Create listing","Sales", "Back" };
             string[] searchui = { "Search Listing", "Search User", "Filters", "Back" };
             userid = Read();
-
+            if (userid != 0) { isLoggedIn = true; }
             while (true)
             {
                 switch (Other.cantThinkOfANameRn(hub, userid,"Main menu"))
@@ -93,15 +110,18 @@ namespace ConsoleShop100percentLegitNoScam.Program
                                 Console.ReadLine();
                                 break;
                             case 2:
+                                userid = 0;
                                 break;
                             case 3:
-                                Listing.cart(userid, isLoggedIn);
+                                User.EditAccount(userid);
                                 break;
                             case 4:
+                                Listing.cart(userid, isLoggedIn);
+                                break;
+                            case 5:
                                 break;
                         }
                         break;
-
                     case 2:
                         if (isLoggedIn)
                             switch (Other.cantThinkOfANameRn(meinListings, userid, "Listings action menu"))

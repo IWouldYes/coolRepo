@@ -196,26 +196,33 @@ namespace ConsoleShop100percentLegitNoScam.Program
             while (reader.Read())
             {
                 lid = (int)reader["listings_id"];
-                Console.WriteLine(lid);
-                Console.Read();
 
-                string fullName = reader["title"] + "x" + reader["quantity"] + "\n" + reader["TotalPrice"] + "zł\n";
+                string fullName = reader["title"] + "x" + reader["quantity"] + "\n";
+                if (reader["TotalPrice"] != DBNull.Value)
+                {
+                    double totalPrice = (double)reader["TotalPrice"];
+                    fullName += totalPrice.ToString("0.00") + "zł\n";
+                }
+                else
+                {
+                    fullName += "Price Unavailable\n";
+                }
+
                 int cartId = (int)reader["id"];
                 name.Add(fullName);
                 id.Add(cartId);
             }
 
+            name.Add("Back");
             if (name.Count > 0) // Check if the 'name' list is not empty
             {
                 reader.NextResult();
 
-                while (reader.Read())
+                if (reader.Read() && reader["CartTotal"] != DBNull.Value)
                 {
                     totalprice = (double)reader["CartTotal"];
                 }
-                stryng = "Total price:" + totalprice;
-
-                name.Add("Back");
+                stryng = "Total price:" + totalprice.ToString("0.00");
 
                 int cid = Other.cantThinkOfANameRn(name.ToArray(), uid, stryng);
                 if (cid == name.Count - 1)
@@ -224,7 +231,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     return;
                 }
 
-                string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Back" };
+                string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Order whole cart", "Back" };
                 int selectedAction = Other.cantThinkOfANameRn(cartoptions, uid, "Action menu");
                 reader.Close();
                 switch (selectedAction)
@@ -266,6 +273,56 @@ namespace ConsoleShop100percentLegitNoScam.Program
             }
         }
 
+
+
+
+        public static void OrderWholeCart(int uid)
+        {
+            string connectionString = Program.connectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string selectQuery = string.Format("SELECT listing_id, quantity FROM cart WHERE user_id = {0}", uid);
+                SqlCommand selectCommand = new SqlCommand(selectQuery, conn);
+                SqlDataReader reader = selectCommand.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    int listingId = (int)reader["listing_id"];
+                    int quantity = (int)reader["quantity"];
+                    double price = GetListingPrice(listingId);
+                    PlaceOrder(uid, listingId, quantity, price, conn);
+                }
+
+                reader.Close();
+                conn.Close();
+            }
+        }
+
+        public static double GetListingPrice(int listingId)
+        {
+            string connectionString = Program.connectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string priceQuery = string.Format("SELECT price FROM listings WHERE id = {0}", listingId);
+                SqlCommand priceCommand = new SqlCommand(priceQuery, conn);
+                double price = (double)priceCommand.ExecuteScalar();
+
+                conn.Close();
+                return price;
+            }
+        }
+
+        public static void PlaceOrder(int uid, int lid, int quantity, double price, SqlConnection conn)
+        {
+            string query = string.Format("INSERT INTO [order_history] (user_id, listing_id, quantity, price, date_ordered, confirmed) VALUES ('{0}', '{1}', '{2}', '{3}', CONVERT(date, GETDATE(), 101), '0')", uid, lid, quantity, price.ToString("0.00", CultureInfo.InvariantCulture));
+            SqlCommand insertOrderCommand = new SqlCommand(query, conn);
+            insertOrderCommand.ExecuteNonQuery();
+            Console.WriteLine("Order placed successfully.");
+        }
 
         public static void delListing(int uid)
         {
@@ -462,7 +519,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     while (reader2.Read())
                     {
                         Console.Clear();
-                        Console.WriteLine(reader2[3]);
+                        Console.WriteLine(reader2[4]);
                         if (double.TryParse(reader2[3].ToString(), out double parsedPrice))
                         {
                             price = parsedPrice;
@@ -472,12 +529,12 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         {
                             Console.WriteLine("Invalid price format");
                         }
-                        Console.WriteLine(reader2[8] + "in stock");
+                        Console.WriteLine(reader2[9] + "in stock");
                         Console.WriteLine();
-                        Console.WriteLine(reader2[0] + " " + reader2[1]);
-                        Console.WriteLine("Phone number: " + reader2[5]);
+                        Console.WriteLine(reader2[1] + " " + reader2[2]);
+                        Console.WriteLine("Phone number: " + reader2[6]);
                         Console.WriteLine();
-                        Console.WriteLine(reader2[4]);
+                        Console.WriteLine(reader2[5]);
                         Other.viewsCounter(lid);
 
                         int listingId = (int)reader2["id"];

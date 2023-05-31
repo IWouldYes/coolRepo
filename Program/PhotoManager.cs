@@ -53,7 +53,7 @@ public class PhotoManager
             fs.Write(imageBytes, 0, imageBytes.Length);
         }
 
-        Console.WriteLine("Photo downloaded successfully.\n"+filePath+"\nThe photo is now on your desktop :D");
+        Console.WriteLine("Photo downloaded successfully.\n"+filePath+"\nThe photo is now on your desktop :D\n click enter to return");
         Console.ReadLine();
 
     

@@ -87,6 +87,59 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             return Other.selectId(password, login);
         }
+        public static void EditAccount(int userId)
+        {
+            SqlConnection conn = new SqlConnection(Program.connectionString);
+            conn.Open();
+
+            Console.WriteLine("Edit Account Information");
+            Console.WriteLine("Leave a field empty to keep the current value.");
+
+            Console.Write("First name: ");
+            string newFirstName = Console.ReadLine();
+            newFirstName = Other.lenght(50, 0, newFirstName, "First name", false);
+
+            Console.Write("Last name: ");
+            string newLastName = Console.ReadLine();
+            newLastName = Other.lenght(50, 0, newLastName, "Last name", false);
+
+            Console.Write("Phone number: ");
+            string newPhoneNumber = Console.ReadLine();
+            newPhoneNumber = Other.lenght(9, 0, newPhoneNumber, "Phone number", true);
+
+            Console.Write("Description: ");
+            string newDescription = Console.ReadLine();
+            newDescription = Other.lenght(500, 0, newDescription, "Description", false);
+
+            Console.Write("Country: ");
+            string newCountry = Console.ReadLine();
+            newCountry = Other.lenght(30, 0, newCountry, "Country", false);
+
+            Console.Write("City: ");
+            string newCity = Console.ReadLine();
+            newCity = Other.lenght(50, 0, newCity, "City", false);
+
+            Console.Write("Street: ");
+            string newStreet = Console.ReadLine();
+            newStreet = Other.lenght(50, 0, newStreet, "Street", false);
+
+            string updateSql = string.Format("UPDATE [user] SET first_name = '{0}', last_name = '{1}', phone_number = '{2}', description = '{3}', country = '{4}', city = '{5}', street = '{6}' WHERE id = {7}",
+                newFirstName, newLastName, newPhoneNumber, newDescription, newCountry, newCity, newStreet, userId);
+
+            SqlCommand updateCommand = new SqlCommand(updateSql, conn);
+            int rowsAffected = updateCommand.ExecuteNonQuery();
+
+            if (rowsAffected > 0)
+            {
+                Console.WriteLine("Account information updated successfully.");
+            }
+            else
+            {
+                Console.WriteLine("User not found or no changes were made.");
+            }
+
+            conn.Close();
+        }
 
         public static int login(bool isLoggedIn)
         {
