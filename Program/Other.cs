@@ -136,8 +136,9 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 break; // Exit the loop if both checks pass
             }
+            
 
-            return variable;
+            return variable.Replace("'", "");;
         }
 
 
