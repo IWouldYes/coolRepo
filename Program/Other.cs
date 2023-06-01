@@ -130,6 +130,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         Console.WriteLine("Nie mozesz tak robic!! 1!1!1!1!1!!!!!!\n dzwonie po kamila\nlease enter a valid integer.");
                         Console.Write($"{variableName}: ");
                         variable = Console.ReadLine();
+
                         continue; // Go to the next iteration of the loop
                     }
                 }

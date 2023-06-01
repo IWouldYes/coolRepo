@@ -63,7 +63,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             bool isLoggedIn = false;
             int userid = 0;
-            string[] myAcc = new string[] { "Login", "Register new account","Log out", "Edit account","My cart","Back" };
+            string[] myAcc = new string[] { "Login", "Register new account","Log out", "Edit account","Delete account","View account data","My cart","Back" };
             string[] hub = new string[] { "Search", "My account", "My listings", "Chat", "Exit" };
             string[] meinListings = new string[] { "Listing actions", "Create listing","Sales", "Back" };
             string[] searchui = { "Search Listing", "Search User", "Filters", "Back" };
@@ -126,9 +126,15 @@ namespace ConsoleShop100percentLegitNoScam.Program
                                 User.EditAccount(userid);
                                 break;
                             case 4:
-                                Listing.cart(userid, isLoggedIn);
+
                                 break;
                             case 5:
+                                User.dUD(userid, userid);
+                                break;
+                            case 6:
+                                Listing.cart(userid, isLoggedIn);
+                                break;
+                            case 7:
                                 break;
                         }
                         break;

@@ -105,6 +105,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             List<string> name = new List<string>();
             List<int> id = new List<int>();
             List<int> listingIds = new List<int>();
+            List<int> selerid = new List<int>();
 
             if (reader.HasRows)
             {
@@ -113,6 +114,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     string fullName = reader["title"] + "\n" + reader["price"] + "zł\n" + reader["first_name"] + " " + reader["last_name"] + "\nx" + reader["quantity"]+"\n";
                     int orderId = (int)reader["id"];
                     int listingId = (int)reader["listing_id"];
+                    selerid.Add((int)reader[1]);
                     name.Add(fullName);
                     id.Add(orderId);
                     listingIds.Add(listingId);
@@ -150,7 +152,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     switch (selectedAction)
                     {
                         case 0:
-                            int userId = (int)reader["user_id"];
+                            int userId = selerid[oid];
                             User.dUD(userId, uid);
                             break;
                         case 1:
@@ -231,7 +233,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                     return;
                 }
 
-                string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Order whole cart", "Back" };
+                string[] cartoptions = { "View details", "Delete from cart", "Edit quantity", "Back" };
                 int selectedAction = Other.cantThinkOfANameRn(cartoptions, uid, "Action menu");
                 reader.Close();
                 switch (selectedAction)

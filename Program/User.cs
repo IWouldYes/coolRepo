@@ -200,7 +200,15 @@ namespace ConsoleShop100percentLegitNoScam.Program
             conn.Close();
             //end of select
         }
-
+        public static void delacc(int uid)
+        {
+            string connectionString = Program.connectionString;
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+            SqlCommand delacc = new SqlCommand();
+            delacc.Connection = conn;
+            delacc.CommandText = string.Format("delete from");
+        }
         public static void dUD(int uid, int muid)
         {
             while (true)
