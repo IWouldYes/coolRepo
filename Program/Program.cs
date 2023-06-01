@@ -1,4 +1,4 @@
-
+//2137 lines
 
 using System.Reflection.Metadata.Ecma335;
 
@@ -6,6 +6,16 @@ namespace ConsoleShop100percentLegitNoScam.Program
 {
     public class Program
     {
+
+
+
+
+
+
+
+
+
+
         public static readonly string connectionString = "workstation id=application.mssql.somee.com;packet size=4096;user id=app_SQLLogin_1;pwd=yespassword;data source=application.mssql.somee.com;persist security info=False;initial catalog=application";
         private static readonly string FileName = "boolValue.txt";
         private static readonly string FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
