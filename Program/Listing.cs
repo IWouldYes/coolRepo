@@ -56,14 +56,15 @@ namespace ConsoleShop100percentLegitNoScam.Program
         public static void editListing(int uid)
         {
             int lid = czos(uid);
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection(Program.connectionString);
+            conn.Open();
             string price, quantity, newtitle, description;
             Console.Write("New title:");
             newtitle = Console.ReadLine();
             newtitle = Other.lenght(50, 2, newtitle, "New title", false);
             Console.Write("Price:");
             price = Console.ReadLine();
-            price = Other.lenght(7, 1, price, "Price", true);
+            price = Other.lenght(7, 1, price, "Price", false);
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
             quantity = Other.lenght(3, 1, quantity, "Quantity", true);
@@ -84,7 +85,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             SqlCommand editListing;
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE id = '{5}';",Other.cantThinkOfANameRn(categorytab, uid,"Choose a category"), newtitle, price, quantity, description, lid);
+            string sql = string.Format("UPDATE Listings SET Category_id = '{0}', Title = '{1}', Price = {2}, Quantity = {3}, Description = '{4}' WHERE id = '{5}';", Other.cantThinkOfANameRn(categorytab, uid, "Choose a category"), newtitle, price, quantity, description, lid);
             Console.WriteLine(sql);
             adapter.InsertCommand = new SqlCommand(sql, conn);
             adapter.InsertCommand.ExecuteNonQuery();
@@ -111,7 +112,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             {
                 while (reader.Read())
                 {
-                    string fullName = reader["title"] + "\n" + reader["price"] + "zł\n" + reader["first_name"] + " " + reader["last_name"] + "\nx" + reader["quantity"]+"\n";
+                    string fullName = reader["title"] + "\n" + reader["price"] + "zł\n" + reader["first_name"] + " " + reader["last_name"] + "\nx" + reader["quantity"] + "\n";
                     int orderId = (int)reader["id"];
                     int listingId = (int)reader["listing_id"];
                     selerid.Add((int)reader[1]);
@@ -335,7 +336,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
             SqlCommand searchcomm = new SqlCommand();
             searchcomm.Connection = conn;
-            searchcomm.CommandText = string.Format("select id, title, price from [listings] where user_id = {0}",uid);
+            searchcomm.CommandText = string.Format("select id, title, price from [listings] where user_id = {0}", uid);
             SqlDataReader reader2 = searchcomm.ExecuteReader();
 
             List<string> name = new List<string>();
@@ -354,7 +355,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         id.Add(userId);
                     }
                 }
-                string sql2 = string.Format("delete from listings where id = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid,"Your listings")]);
+                string sql2 = string.Format("delete from listings where id = '{0}'", id[Other.cantThinkOfANameRn(name.ToArray(), uid, "Your listings")]);
                 SqlCommand delListing;
                 SqlDataAdapter adapter = new SqlDataAdapter();
                 delListing = new SqlCommand(sql2, conn);
@@ -370,7 +371,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
 
 
-            
+
 
         }
 
@@ -467,7 +468,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             title = Other.lenght(50, 2, title, "Title", false);
             Console.Write("Price:");
             price = Console.ReadLine();
-            price = Other.lenght(7, 1, price, "Price", true);
+            price = Other.lenght(7, 1, price, "Price", false);
             price = price.Replace(',', '.');
             Console.Write("Quantity:");
             quantity = Console.ReadLine();
@@ -514,7 +515,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 // Number of columns
                 SqlDataReader reader2 = searchcomm.ExecuteReader();
 
-                string[] authordetails = { "Check author profile", "Post a review", "Show listing photo", "Add to cart", "Order now", "Main menu" };
+                string[] authordetails = { "Check author profile", "Post a review", "Edit review ", "Delete review", "Show listing photo", "Add to cart", "Order now", "Main menu" };
 
                 if (reader2.HasRows)
                 {
@@ -577,11 +578,43 @@ namespace ConsoleShop100percentLegitNoScam.Program
                 }
                 reviewReader.Close();
 
+                SqlCommand searchRatingCommand = new SqlCommand();
+                searchRatingCommand.Connection = conn;
+                searchRatingCommand.CommandText = string.Format("SELECT [ratings].[user_id], [ratings].[rating], [user].[first_name], [user].[last_name] FROM [ratings] INNER JOIN [user] ON [ratings].[user_id] = [user].[id] WHERE [ratings].[listing_id] = '{0}'", lid);
+                reader2.Close();
+                SqlDataReader ratingReader = searchRatingCommand.ExecuteReader();
+
+                if (ratingReader.HasRows)
+                {
+                    Console.WriteLine("\n-----------------------");
+                    while (ratingReader.Read())
+                    {
+                        int userId = (int)ratingReader["user_id"];
+                        int rating = (int)ratingReader["rating"];
+                        string userFirstName = (string)ratingReader["first_name"];
+                        string userLastName = (string)ratingReader["last_name"];
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"{userFirstName} {userLastName}");
+                        Console.ResetColor();
+                        Console.WriteLine($"Rating: {rating} out of 10");
+                        Console.WriteLine();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\nNo ratings found");
+                }
+                ratingReader.Close();
+
+                // Rest of the code...
+
                 Console.WriteLine("Click enter to see author profile or return to the main menu");
                 Console.ReadLine();
                 SqlDataReader reader3 = searchcomm.ExecuteReader();
                 reader3.Read();
                 int iud = (int)reader3[6];
+                int di;
                 switch (Other.cantThinkOfANameRn(authordetails, uid, "Listing actions"))
                 {
                     case 0:
@@ -589,13 +622,36 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         reader2.Close();
                         break;
                     case 1:
-                        AddReview(uid, lid, loggedin);
+                        Console.WriteLine("review content:");
+                        string content = Console.ReadLine();
+                        Console.WriteLine("rating out of 10:");
+                        string rating = Console.ReadLine();
+                        AddReview(uid, lid, loggedin, content, rating);
                         break;
                     case 2:
+                        di = Reviewactionmenu(uid, lid);
+                        if (di > 0)
+                        {
+                            Console.WriteLine("New content:");
+                            string newcontent = Console.ReadLine();
+                            EditReview(di, newcontent);
+                        }
+
+                        break;
+                    case 3:
+                        di = Reviewactionmenu(uid, lid);
+                        if (di > 0)
+                        {
+                            Console.WriteLine("New content:");
+                            DeleteReview(di);
+                        }
+                        ;
+                        break;
+                    case 4:
                         //show listing photo
                         PhotoManager.ShowListingPhoto(lid);
                         break;
-                    case 3:
+                    case 5:
                         // Add to cart
                         if (!loggedin)
                         {
@@ -606,7 +662,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         }
                         addtocart(uid, lid);
                         break;
-                    case 4:
+                    case 6:
                         // Order now
                         if (!loggedin)
                         {
@@ -617,11 +673,40 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         }
                         order(uid, lid, price);
                         break;
-                    case 5:
+                    case 7:
                         return;
                 }
 
                 conn.Close();
+            }
+        }
+
+
+        public static int Reviewactionmenu(int uid, int lid)
+        {
+            List<string> reviewContents = new List<string>();
+            List<int> reviewIds = new List<int>();
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = string.Format("SELECT id, content FROM reviews where listing_id = {0}", lid);
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        reviewIds.Add(reader.GetInt32(0));
+                        reviewContents.Add(reader.GetString(1));
+                    }
+                    reviewContents.Add("back");
+                    reviewIds.Add(0);
+                    reader.Close();
+                }
+                return reviewIds[Other.cantThinkOfANameRn(reviewContents.ToArray(), uid, "Your reviews about this listing")];
+
+
             }
         }
 
@@ -709,25 +794,90 @@ namespace ConsoleShop100percentLegitNoScam.Program
         }
 
 
-        public static void AddReview(int reviewerId, int revieweeId, bool loggedin)
+        public static void AddReview(int reviewerId, int revieweeId, bool loggedIn, string reviewContent, string rating)
         {
-            SqlConnection conn = new SqlConnection(Program.connectionString);
-            conn.Open();
-            if (!loggedin) { Console.WriteLine("Please log in first"); Thread.Sleep(1000); Console.Clear(); return; }
-            Console.WriteLine("Enter the review content:");
-            string reviewContent = Console.ReadLine();
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
 
-            string query = string.Format("INSERT INTO [reviews] (user_id, listing_id, content) VALUES ({0},{1},'{2}')", reviewerId, revieweeId, reviewContent);
+                if (!loggedIn)
+                {
+                    Console.WriteLine("Please log in first");
+                    Thread.Sleep(1000);
+                    Console.Clear();
+                    return;
+                }
 
-            SqlCommand insertReviewCommand = new SqlCommand(query, conn);
+                string reviewQuery = "INSERT INTO [reviews] (user_id, listing_id, content) VALUES (@reviewerId, @revieweeId, @reviewContent)";
+                using (SqlCommand reviewCommand = new SqlCommand(reviewQuery, connection))
+                {
+                    reviewCommand.Parameters.AddWithValue("@reviewerId", reviewerId);
+                    reviewCommand.Parameters.AddWithValue("@revieweeId", revieweeId);
+                    reviewCommand.Parameters.AddWithValue("@reviewContent", reviewContent);
 
+                    reviewCommand.ExecuteNonQuery();
+                }
 
-            insertReviewCommand.ExecuteNonQuery();
+                string ratingQuery = "INSERT INTO [ratings] (user_id, listing_id, rating) VALUES (@reviewerId, @revieweeId, @rating)";
+                using (SqlCommand ratingCommand = new SqlCommand(ratingQuery, connection))
+                {
+                    ratingCommand.Parameters.AddWithValue("@reviewerId", reviewerId);
+                    ratingCommand.Parameters.AddWithValue("@revieweeId", revieweeId);
+                    ratingCommand.Parameters.AddWithValue("@rating", rating);
 
-            Console.WriteLine("Review added successfully.");
+                    ratingCommand.ExecuteNonQuery();
+                }
 
-            conn.Close();
+                Console.WriteLine("Review and rating added successfully.");
+            }
         }
 
+
+
+        public static void EditReview(int reviewId, string newContent)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = "UPDATE reviews SET content = @newContent WHERE id = @reviewId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@newContent", newContent);
+                    command.Parameters.AddWithValue("@reviewId", reviewId);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void AddRating(int userId, int listingId, int rating)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = string.Format("INSERT INTO ratings (user_id, listing_id, rating) VALUES ({0},{1},{2})", userId, listingId, rating);
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        public static void DeleteReview(int reviewId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = "DELETE FROM reviews WHERE id = @reviewId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@reviewId", reviewId);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }

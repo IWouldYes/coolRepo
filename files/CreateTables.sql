@@ -80,3 +80,12 @@ CREATE TABLE [cart](
 [quantity] int NOT NULL,
 [date_added] date NOT NULL
 );
+
+CREATE TABLE ratings (
+    [id] int identity(1,1) CONSTRAINT PK_ratings PRIMARY KEY,
+    user_id INT,
+    listing_id INT,
+    rating INT,
+    CONSTRAINT FK_ratings_user_id FOREIGN KEY (user_id) REFERENCES [user]([id]),
+    CONSTRAINT FK_ratings_listing_id FOREIGN KEY (listing_id) REFERENCES listings([id])
+);

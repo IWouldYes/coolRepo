@@ -1,0 +1,30 @@
+﻿dodawanie użytkownika
+usuwanie uzytkownika
+edycja użytkownika
+wyszukiwanie użytkownika
+wyświetlanie użytkownika
+tworzenie ogłoszenia
+edycja ogłoszenia
+usuwanie ogłoszenia
+dodawanie zdjęcia do ogłoszenia
+zamiana zdjęcia w ogłoszeniu
+usuwanie zdjęcia z ogłoszenia
+wyszukiwanie ogłoszenia
+wyświetlanie ogłoszenia
+dodawanie recenzji ogłoszenia
+dodawanie oceny ogłoszenia
+edycja recenzji ogłoszenia
+usuwanie recenzji ogłoszenia
+dodawanie komantarza
+edycja komantarza
+usuwanie komantarza
+filtrowanie wyszukiwania
+zamawianie 
+potwierdzenie zamówienia przez sprzedawcę
+dodawanie do koszyka
+usuwanie z koszyka
+zapisywanie do pliku id użytkownika
+szyfrowanie id w pliku
+wysyłanie wiadomości użytkownikowi
+wyświetlanie czatu
+wyświetlanie zdjęcia ogłoszenia

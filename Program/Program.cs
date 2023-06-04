@@ -126,7 +126,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
                                 User.EditAccount(userid);
                                 break;
                             case 4:
-
+                                User.DeleteUser(userid);
                                 break;
                             case 5:
                                 User.dUD(userid, userid);

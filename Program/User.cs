@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -93,19 +94,25 @@ namespace ConsoleShop100percentLegitNoScam.Program
             conn.Open();
 
             Console.WriteLine("Edit Account Information");
-            Console.WriteLine("Leave a field empty to keep the current value.");
+            Console.Write("Login: ");
+            string newlogin = Console.ReadLine();
+            newlogin = Other.lenght(30, 4, newlogin, "Login", false);
 
             Console.Write("First name: ");
             string newFirstName = Console.ReadLine();
-            newFirstName = Other.lenght(50, 0, newFirstName, "First name", false);
+            newFirstName = Other.lenght(50, 2, newFirstName, "First name", false);
 
             Console.Write("Last name: ");
             string newLastName = Console.ReadLine();
-            newLastName = Other.lenght(50, 0, newLastName, "Last name", false);
+            newLastName = Other.lenght(50, 2, newLastName, "Last name", false);
+
+            Console.Write("Password: ");
+            string newpassword = Console.ReadLine();
+            newpassword = Other.lenght(30, 4, newpassword, "Password", false);
 
             Console.Write("Phone number: ");
             string newPhoneNumber = Console.ReadLine();
-            newPhoneNumber = Other.lenght(9, 0, newPhoneNumber, "Phone number", true);
+            newPhoneNumber = Other.lenght(9, 4, newPhoneNumber, "Phone number", true);
 
             Console.Write("Description: ");
             string newDescription = Console.ReadLine();
@@ -123,8 +130,8 @@ namespace ConsoleShop100percentLegitNoScam.Program
             string newStreet = Console.ReadLine();
             newStreet = Other.lenght(50, 0, newStreet, "Street", false);
 
-            string updateSql = string.Format("UPDATE [user] SET first_name = '{0}', last_name = '{1}', phone_number = '{2}', description = '{3}', country = '{4}', city = '{5}', street = '{6}' WHERE id = {7}",
-                newFirstName, newLastName, newPhoneNumber, newDescription, newCountry, newCity, newStreet, userId);
+            string updateSql = string.Format("UPDATE [user] SET first_name = '{0}', last_name = '{1}', phone_number = '{2}', description = '{3}', country = '{4}', city = '{5}', street = '{6}', password = '{8}',login = '{9}' WHERE id = {7}",
+                newFirstName, newLastName, newPhoneNumber, newDescription, newCountry, newCity, newStreet, userId,newpassword,newlogin);
 
             SqlCommand updateCommand = new SqlCommand(updateSql, conn);
             int rowsAffected = updateCommand.ExecuteNonQuery();
@@ -200,15 +207,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
             conn.Close();
             //end of select
         }
-        public static void delacc(int uid)
-        {
-            string connectionString = Program.connectionString;
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
-            SqlCommand delacc = new SqlCommand();
-            delacc.Connection = conn;
-            delacc.CommandText = string.Format("delete from");
-        }
+
         public static void dUD(int uid, int muid)
         {
             while (true)
@@ -225,7 +224,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 SqlDataReader userReader = searchUserCommand.ExecuteReader();
 
-                string[] authorActions = { "Message author", "Comment", "Main menu" };
+                string[] authorActions = { "Message author", "Comment","Edit comment","Delete comment", "Main menu" };
                 string name;
                 if (userReader.HasRows)
                 {
@@ -280,7 +279,7 @@ namespace ConsoleShop100percentLegitNoScam.Program
 
                 Console.Write("\nPress Enter to open the action menu");
                 Console.ReadLine();
-
+                int di;
                 switch (Other.cantThinkOfANameRn(authorActions, muid,""))
                 {
                     case 0:
@@ -291,6 +290,23 @@ namespace ConsoleShop100percentLegitNoScam.Program
                         AddComment(muid, uid);
                         break;
                     case 2:
+                        di = commentactionmenu(muid, uid);
+                        if (di > 0)
+                        {
+                            Console.WriteLine("New content:");
+                            string newcontent = Console.ReadLine();
+                            EditComment(di, newcontent);
+                        }
+
+                        break;
+                    case 3:
+                        di = commentactionmenu(muid, uid);
+                        if (di > 0)
+                        {
+                            DeleteComment(di);
+                        }
+                        break;
+                    case 4:
                         // Main menu
                         return;
                 }
@@ -299,6 +315,82 @@ namespace ConsoleShop100percentLegitNoScam.Program
             }
 
         }
+        public static int commentactionmenu(int uid, int lid)
+        {
+            List<string> reviewContents = new List<string>();
+            List<int> reviewIds = new List<int>();
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = string.Format("SELECT id, content FROM comments where commentee_id = {0}", lid);
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        reviewIds.Add(reader.GetInt32(0));
+                        reviewContents.Add(reader.GetString(1));
+                    }
+                    reviewContents.Add("back");
+                    reviewIds.Add(0);
+                    reader.Close();
+                }
+                return reviewIds[Other.cantThinkOfANameRn(reviewContents.ToArray(), uid, "Your comments about this user")];
+
+
+            }
+        }
+
+        public static void EditComment(int commentId, string newContent)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = "UPDATE comments SET content = @newContent WHERE id = @commentId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@newContent", newContent);
+                    command.Parameters.AddWithValue("@commentId", commentId);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void DeleteComment(int commentId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = "DELETE FROM comments WHERE id = @commentId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@commentId", commentId);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void DeleteUser(int userId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.connectionString))
+            {
+                connection.Open();
+
+                string query = string.Format("DELETE FROM [user] WHERE [id] = {0}", userId);
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
 
         public static void AddComment(int CommenterId, int CommenteeId)
         {
